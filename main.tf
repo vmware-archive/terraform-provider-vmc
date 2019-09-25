@@ -1,5 +1,5 @@
 provider "vmc" {
-  refresh_token = ""
+  refresh_token = "2v52GhcQWwqQodAM9kLqdYVMauENDu6ka51bP3Qh5nZedu3WYCk0MnEvsyM6oyvQ"
 
   # for staging environment only
   # vmc_url       = "https://stg.skyscraper.vmware.com/vmc/api"
@@ -7,7 +7,7 @@ provider "vmc" {
 }
 
 data "vmc_org" "my_org" {
-  id = ""
+  id = "54937bce-8119-4fae-84f5-e5e066ee90e6"
 }
 
 data "vmc_connected_accounts" "my_accounts" {
@@ -24,7 +24,7 @@ resource "vmc_sddc" "sddc_1" {
   org_id = "${data.vmc_org.my_org.id}"
 
   # storage_capacity    = 100
-  sddc_name           = ""
+  sddc_name           = "saloneerege-test"
   vpc_cidr            = "10.2.0.0/16"
   num_host            = 1
   provider_type       = "AWS"
@@ -37,10 +37,8 @@ resource "vmc_sddc" "sddc_1" {
   # sddc_template_id = ""
   deployment_type = "SingleAZ"
 
-  account_link_sddc_config = [
-    {
+  account_link_sddc_config {
       customer_subnet_ids  = ["${data.vmc_customer_subnets.my_subnets.ids.0}"]
       connected_account_id = "${data.vmc_connected_accounts.my_accounts.ids.0}"
-    },
-  ]
+    }
 }

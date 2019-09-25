@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccResourceVmcSddc_basic(t *testing.T) {
-	sddcName := "terraform_test_sddc_" + acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	sddcName := "srege_test_sddc_" + acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -91,7 +91,7 @@ provider "vmc" {
 }
 	
 data "vmc_org" "my_org" {
-	id = "058f47c4-92aa-417f-8747-87f3ed61cb45"
+	id = "54937bce-8119-4fae-84f5-e5e066ee90e6"
 
 	# id = "05e0a625-3293-41bb-a01f-35e762781c2a"
 }

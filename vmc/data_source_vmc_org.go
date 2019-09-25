@@ -1,12 +1,10 @@
 package vmc
 
 import (
-	"context"
 	"fmt"
-
-	"net/http"
-
 	"github.com/hashicorp/terraform/helper/schema"
+	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/utils"
+	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/com/vmware/vmc/orgs"
 	"gitlab.eng.vmware.com/vapi-sdk/vmc-go-sdk/vmc"
 )
 
@@ -36,18 +34,21 @@ func dataSourceVmcOrg() *schema.Resource {
 
 func dataSourceVmcOrgRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*vmc.Client)
-	objID := d.Get("id").(string)
-	var obj vmc.Organization
-	obj, resp, err := client.OrgsApi.OrgsOrgGet(context.Background(), objID)
+	orgID := d.Get("id").(string)
+	connector, err := utils.NewVmcConnector(client.RefreshToken, "", "")
 	if err != nil {
-		return fmt.Errorf("Error while reading ns group %s: %v", objID, err)
+		return fmt.Errorf("Error while reading org with org ID %s: %v", orgID, err)
 	}
-	if resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("NS group %s was not found", objID)
+
+	orgClient := orgs.NewOrgsClientImpl(connector)
+	org, err := orgClient.Get(orgID)
+
+	if err != nil {
+		return fmt.Errorf("Error while reading org with org ID %s: %v", orgID, err)
 	}
-	d.SetId(obj.Id)
-	d.Set("display_name", obj.DisplayName)
-	d.Set("name", obj.Name)
+	d.SetId(org.Id)
+	d.Set("display_name", org.DisplayName)
+	d.Set("name", org.Name)
 
 	return nil
 }

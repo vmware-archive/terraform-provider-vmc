@@ -32,7 +32,7 @@ provider "vmc" {
 }
 	
 data "vmc_org" "my_org" {
-	id = "058f47c4-92aa-417f-8747-87f3ed61cb45"
+	id = "54937bce-8119-4fae-84f5-e5e066ee90e6"
 }
 	
 data "vmc_connected_accounts" "my_accounts" {
