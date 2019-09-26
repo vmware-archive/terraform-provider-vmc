@@ -15,10 +15,10 @@ func TestAccDataSourceVmcCustomerSubnets_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceVmcCustomerSubnetsConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.vmc_customer_subnets.my_subnets", "ids.#", "3"),
-					resource.TestCheckResourceAttr("data.vmc_customer_subnets.my_subnets", "ids.0", "subnet-13a0c249"),
-					resource.TestCheckResourceAttr("data.vmc_customer_subnets.my_subnets", "ids.1", "subnet-14a42d6d"),
-					resource.TestCheckResourceAttr("data.vmc_customer_subnets.my_subnets", "ids.2", "subnet-2170db6a"),
+					resource.TestCheckResourceAttr("data.vmc_customer_subnets.my_subnets", "ids.#", "4"),
+					resource.TestCheckResourceAttr("data.vmc_customer_subnets.my_subnets", "ids.0", "subnet-8cabb6f5"),
+					resource.TestCheckResourceAttr("data.vmc_customer_subnets.my_subnets", "ids.1", "subnet-1ecff155"),
+					resource.TestCheckResourceAttr("data.vmc_customer_subnets.my_subnets", "ids.2", "subnet-98fc13c5"),
 				),
 			},
 		},

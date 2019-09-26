@@ -1,13 +1,11 @@
 package vmc
 
 import (
-	"context"
 	"fmt"
-	"github.com/antihax/optional"
-	"log"
-
 	"github.com/hashicorp/terraform/helper/schema"
-	"gitlab.eng.vmware.com/vapi-sdk/vmc-go-sdk/vmc"
+	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/com/vmware/vmc/orgs/account_link/compatibleSubnets"
+	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/runtime/protocol/client"
+	"log"
 )
 
 func dataSourceVmcCustomerSubnets() *schema.Resource {
@@ -56,26 +54,18 @@ func dataSourceVmcCustomerSubnets() *schema.Resource {
 }
 
 func dataSourceVmcCustomerSubnetsRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*vmc.Client)
+
 	orgID := d.Get("org_id").(string)
 	accountID := d.Get("connected_account_id").(string)
 	sddcID := d.Get("sddc_id").(string)
 	region := d.Get("region").(string)
-	// providerString := optional.NewString(providerType)
 
-	getOpts := &vmc.OrgsOrgAccountLinkCompatibleSubnetsGetOpts{
-		LinkedAccountId: optional.NewString(accountID),
-		Region:          optional.NewString(region),
-		Sddc:            optional.NewString(sddcID),
-	}
-
-	compSubnets, _, err := client.AccountLinkingApi.OrgsOrgAccountLinkCompatibleSubnetsGet(
-		context.Background(), orgID, getOpts)
-
+	compatibleSubnetsClient := compatibleSubnets.NewCompatibleSubnetsClientImpl(m.(client.Connector))
+	compatibleSubnets, err := compatibleSubnetsClient.Get(orgID, &accountID, &region, &sddcID, nil, nil)
 	ids := []string{}
-	for _, value := range compSubnets.VpcMap {
+	for _, value := range compatibleSubnets.VpcMap {
 		for _, subnet := range value.Subnets {
-			ids = append(ids, subnet.SubnetId)
+			ids = append(ids, *subnet.SubnetId)
 		}
 	}
 
@@ -89,7 +79,7 @@ func dataSourceVmcCustomerSubnetsRead(d *schema.ResourceData, m interface{}) err
 	}
 
 	d.Set("ids", ids)
-	d.Set("customer_available_zones", compSubnets.CustomerAvailableZones)
+	d.Set("customer_available_zones", compatibleSubnets.CustomerAvailableZones)
 	d.SetId(fmt.Sprintf("%s-%s", orgID, accountID))
 	return nil
 }

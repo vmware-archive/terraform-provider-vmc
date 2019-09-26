@@ -3,9 +3,8 @@ package vmc
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/utils"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/com/vmware/vmc/orgs"
-	"gitlab.eng.vmware.com/vapi-sdk/vmc-go-sdk/vmc"
+	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/runtime/protocol/client"
 )
 
 func dataSourceVmcOrg() *schema.Resource {
@@ -33,14 +32,9 @@ func dataSourceVmcOrg() *schema.Resource {
 }
 
 func dataSourceVmcOrgRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*vmc.Client)
 	orgID := d.Get("id").(string)
-	connector, err := utils.NewVmcConnector(client.RefreshToken, "", "")
-	if err != nil {
-		return fmt.Errorf("Error while reading org information for %s: %v", orgID, err)
-	}
 
-	orgClient := orgs.NewOrgsClientImpl(connector)
+	orgClient := orgs.NewOrgsClientImpl(m.(client.Connector))
 	org, err := orgClient.Get(orgID)
 
 	if err != nil {

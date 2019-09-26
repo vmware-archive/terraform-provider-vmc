@@ -1,9 +1,10 @@
 package vmc
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"gitlab.eng.vmware.com/vapi-sdk/vmc-go-sdk/vmc"
+	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/utils"
 )
 
 // Provider for VMware VMC Console APIs. Returns terraform.ResourceProvider
@@ -42,8 +43,9 @@ func Provider() terraform.ResourceProvider {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	refreshToken := d.Get("refresh_token").(string)
-	vmcURL := d.Get("vmc_url").(string)
-	cspURL := d.Get("csp_url").(string)
-
-	return vmc.NewClient(refreshToken, vmcURL, cspURL)
+	connector, err := utils.NewVmcConnector(refreshToken, "", "")
+	if err != nil {
+		return connector,fmt.Errorf("Error creating connector : %v ", err)
+	}
+   return connector, nil
 }
