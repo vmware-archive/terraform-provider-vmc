@@ -1,5 +1,5 @@
 provider "vmc" {
-  refresh_token = "2v52GhcQWwqQodAM9kLqdYVMauENDu6ka51bP3Qh5nZedu3WYCk0MnEvsyM6oyvQ"
+  refresh_token = ""
 
   # for staging environment only
   # vmc_url       = "https://stg.skyscraper.vmware.com/vmc/api"
@@ -7,7 +7,7 @@ provider "vmc" {
 }
 
 data "vmc_org" "my_org" {
-  id = "54937bce-8119-4fae-84f5-e5e066ee90e6"
+  id = ""
 }
 
 data "vmc_connected_accounts" "my_accounts" {

@@ -37,14 +37,14 @@ func dataSourceVmcOrgRead(d *schema.ResourceData, m interface{}) error {
 	orgID := d.Get("id").(string)
 	connector, err := utils.NewVmcConnector(client.RefreshToken, "", "")
 	if err != nil {
-		return fmt.Errorf("Error while reading org with org ID %s: %v", orgID, err)
+		return fmt.Errorf("Error while reading org information for %s: %v", orgID, err)
 	}
 
 	orgClient := orgs.NewOrgsClientImpl(connector)
 	org, err := orgClient.Get(orgID)
 
 	if err != nil {
-		return fmt.Errorf("Error while reading org with org ID %s: %v", orgID, err)
+		return fmt.Errorf("Error while reading org information for %s: %v", orgID, err)
 	}
 	d.SetId(org.Id)
 	d.Set("display_name", org.DisplayName)
