@@ -43,7 +43,9 @@ func Provider() terraform.ResourceProvider {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	refreshToken := d.Get("refresh_token").(string)
-	connector, err := utils.NewVmcConnector(refreshToken, "", "")
+	vmcURL := d.Get("vmc_url").(string)
+	cspURL := d.Get("csp_url").(string)
+	connector, err := utils.NewVmcConnector(refreshToken, vmcURL, cspURL)
 	if err != nil {
 		return connector,fmt.Errorf("Error creating connector : %v ", err)
 	}
