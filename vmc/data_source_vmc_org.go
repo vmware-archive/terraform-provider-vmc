@@ -12,17 +12,17 @@ func dataSourceVmcOrg() *schema.Resource {
 		Read: dataSourceVmcOrgRead,
 
 		Schema: map[string]*schema.Schema{
-			"id": &schema.Schema{
+			"id": {
 				Type:        schema.TypeString,
 				Description: "Unique ID of this resource",
 				Required:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource",
 				Computed:    true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:        schema.TypeString,
 				Description: "The Name of this resource",
 				Computed:    true,

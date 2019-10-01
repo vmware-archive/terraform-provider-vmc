@@ -13,42 +13,42 @@ func dataSourceVmcCustomerSubnets() *schema.Resource {
 		Read: dataSourceVmcCustomerSubnetsRead,
 
 		Schema: map[string]*schema.Schema{
-			"org_id": &schema.Schema{
+			"org_id": {
 				Type:        schema.TypeString,
 				Description: "Organization identifier.",
 				Required:    true,
 			},
-			"connected_account_id": &schema.Schema{
+			"connected_account_id": {
 				Type:        schema.TypeString,
 				Description: "The linked connected account identifier.",
 				Optional:    true,
 			},
-			"region": &schema.Schema{
+			"region": {
 				Type:        schema.TypeString,
 				Description: "The region of the cloud resources to work in.",
 				Required:    true,
 			},
-			"num_hosts": &schema.Schema{
+			"num_hosts": {
 				Type:        schema.TypeInt,
 				Description: "The number of hosts .",
 				Optional:    true,
 			},
-			"sddc_id": &schema.Schema{
+			"sddc_id": {
 				Type:        schema.TypeString,
 				Description: "Sddc ID.",
 				Optional:    true,
 			},
-			"sddc_type": &schema.Schema{
+			"sddc_type": {
 				Type:        schema.TypeString,
 				Description: "Sddc Type.",
 				Optional:    true,
 			},
-			"force_refresh": &schema.Schema{
+			"force_refresh": {
 				Type:        schema.TypeBool,
 				Description: "When true, forces the mappings for datacenters to be refreshed for the connected account.",
 				Optional:    true,
 			},
-			"instance_type": &schema.Schema{
+			"instance_type": {
 				Type:        schema.TypeString,
 				Description: "The server instance type to be used.",
 				Optional:    true,
@@ -74,6 +74,7 @@ func dataSourceVmcCustomerSubnets() *schema.Resource {
 }
 
 func dataSourceVmcCustomerSubnetsRead(d *schema.ResourceData, m interface{}) error {
+
 	orgID := d.Get("org_id").(string)
 	accountID := d.Get("connected_account_id").(string)
 	sddcID := d.Get("sddc_id").(string)

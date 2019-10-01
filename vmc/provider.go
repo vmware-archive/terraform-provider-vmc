@@ -11,16 +11,16 @@ import (
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"refresh_token": &schema.Schema{
+			"refresh_token": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"vmc_url": &schema.Schema{
+			"vmc_url": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "https://vmc.vmware.com/vmc/api",
 			},
-			"csp_url": &schema.Schema{
+			"csp_url": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "https://console.cloud.vmware.com",

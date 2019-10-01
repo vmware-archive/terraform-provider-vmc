@@ -13,12 +13,12 @@ func dataSourceVmcConnectedAccounts() *schema.Resource {
 		Read: dataSourceVmcConnectedAccountsRead,
 
 		Schema: map[string]*schema.Schema{
-			"org_id": &schema.Schema{
+			"org_id": {
 				Type:        schema.TypeString,
 				Description: "Organization identifier.",
 				Required:    true,
 			},
-			"provider_type": &schema.Schema{
+			"provider_type": {
 				Type:        schema.TypeString,
 				Description: "The cloud provider of the SDDC (AWS or ZeroCloud).",
 				Optional:    true,
