@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/acctest"
-	"net/http"
-	"os"
-	"testing"
-
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"gitlab.eng.vmware.com/vapi-sdk/vmc-go-sdk/vmc"
+	"net/http"
+	"os"
+	"testing"
 )
 
 func TestAccResourceVmcSddc_basic(t *testing.T) {
@@ -92,8 +91,6 @@ provider "vmc" {
 	
 data "vmc_org" "my_org" {
 	id = "54937bce-8119-4fae-84f5-e5e066ee90e6"
-
-	# id = "05e0a625-3293-41bb-a01f-35e762781c2a"
 }
 
 data "vmc_connected_accounts" "accounts" {

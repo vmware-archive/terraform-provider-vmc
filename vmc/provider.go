@@ -47,7 +47,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	cspURL := d.Get("csp_url").(string)
 	connector, err := utils.NewVmcConnector(refreshToken, vmcURL, cspURL)
 	if err != nil {
-		return connector,fmt.Errorf("Error creating connector : %v ", err)
+		return connector, fmt.Errorf("Error creating connector : %v ", err)
 	}
-   return connector, nil
+	return connector, nil
 }
