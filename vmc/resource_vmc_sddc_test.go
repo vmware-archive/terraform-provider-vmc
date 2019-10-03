@@ -1,13 +1,12 @@
 package vmc
 
 import (
-	"context"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"gitlab.eng.vmware.com/vapi-sdk/vmc-go-sdk/vmc"
-	"net/http"
+	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/sddcs"
+	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/runtime/protocol/client"
 	"os"
 	"testing"
 )
@@ -38,25 +37,27 @@ func testCheckVmcSddcExists(name string) resource.TestCheckFunc {
 		sddcID := rs.Primary.Attributes["id"]
 		sddcName := rs.Primary.Attributes["sddc_name"]
 		orgID := rs.Primary.Attributes["org_id"]
+		connector := testAccProvider.Meta().(client.Connector)
+		sddcClient := sddcs.NewSddcsClientImpl(connector)
 
-		client := testAccProvider.Meta().(*vmc.Client)
-		_, resp, err := client.SddcApi.OrgsOrgSddcsSddcGet(context.Background(), orgID, sddcID)
+		sddc, err := sddcClient.Get(orgID, sddcID)
 		if err != nil {
 			return fmt.Errorf("Bad: Get on sddcApi: %s", err)
 		}
 
-		if resp.StatusCode == http.StatusNotFound {
+		if sddc.Id != sddcID {
 			return fmt.Errorf("Bad: Sddc %q does not exist", sddcName)
 		}
 
-		fmt.Print("SDDC created successfully")
+		fmt.Printf("SDDC %s created successfully with id %s ", sddcName, sddcID)
 		return nil
 	}
 }
 
 func testCheckVmcSddcDestroy(s *terraform.State) error {
 
-	client := testAccProvider.Meta().(*vmc.Client)
+	connector := testAccProvider.Meta().(client.Connector)
+	sddcClient := sddcs.NewSddcsClientImpl(connector)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "vmc_sddc" {
@@ -65,12 +66,11 @@ func testCheckVmcSddcDestroy(s *terraform.State) error {
 
 		sddcID := rs.Primary.Attributes["id"]
 		orgID := rs.Primary.Attributes["org_id"]
-		task, _, err := client.SddcApi.OrgsOrgSddcsSddcDelete(context.Background(), orgID, sddcID, nil)
-		// TODO: check why error raised when deleting sddc.
-		// if err != nil {
-		// 	return fmt.Errorf("Error while deleting sddc %q, %v, %v", sddcID, err, resp)
-		// }
-		err = vmc.WaitForTask(client, orgID, task.Id)
+		task, err := sddcClient.Delete(orgID, sddcID, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf("Error while deleting sddc %s, %s", sddcID, err)
+		}
+		err = WaitForTask(connector, orgID, task.Id)
 		if err != nil {
 			return fmt.Errorf("Error while waiting for task %q: %v", task.Id, err)
 		}
