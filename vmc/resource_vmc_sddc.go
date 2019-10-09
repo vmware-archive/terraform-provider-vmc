@@ -1,7 +1,6 @@
 package vmc
 
 import (
-	"context"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -178,6 +177,8 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Wait until Sddc is created
 	sddcID := task.ResourceId
+	fmt.Println("Inside SDDC create ")
+	fmt.Println(*sddcID)
 	d.SetId(*sddcID)
 	tasksClient := tasks.NewTasksClientImpl(connector)
 
@@ -304,10 +305,14 @@ func expandAccountLinkSddcConfig(l []interface{}) []model.AccountLinkSddcConfig 
 
 	for _, config := range l {
 		c := config.(map[string]interface{})
+		fmt.Println("Value of C")
+		fmt.Println(c)
 		var subnetIds []string
 		for _, subnetID := range c["customer_subnet_ids"].([]interface{}) {
 
 			subnetIds = append(subnetIds, subnetID.(string))
+			fmt.Println("Inside SDDC creation ")
+			fmt.Println(subnetIds)
 		}
 		var connectedAccId = c["connected_account_id"].(string)
 		con := model.AccountLinkSddcConfig{
@@ -318,25 +323,4 @@ func expandAccountLinkSddcConfig(l []interface{}) []model.AccountLinkSddcConfig 
 		configs = append(configs, con)
 	}
 	return configs
-}
-
-func WaitForTask(connector client.Connector, orgID string, taskID string) error {
-	fmt.Printf("Wait for task %q to complete\n", taskID)
-	tasksClient := tasks.NewTasksClientImpl(connector)
-
-	for {
-
-		task, err := tasksClient.Get(orgID, taskID)
-		if err != nil {
-			return fmt.Errorf("Error while getting task %s: %v", taskID, err)
-		}
-
-		if *task.Status == "STARTED" || *task.Status == "CANCELING" {
-			waitInterval := 2 * time.Second
-			fmt.Print(".")
-			time.Sleep(waitInterval)
-			continue
-		}
-		return nil
-	}
 }

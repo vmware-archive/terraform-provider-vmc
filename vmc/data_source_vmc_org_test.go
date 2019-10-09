@@ -15,8 +15,8 @@ func TestAccDataSourceVmcOrg_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceVmcOrgConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.vmc_org.my_org", "display_name", "DX AUTO Core Team"),
-					resource.TestCheckResourceAttr("data.vmc_org.my_org", "name", "k0byp9w7"),
+					resource.TestCheckResourceAttr("data.vmc_org.my_org", "display_name", "VMC Org"),
+					resource.TestCheckResourceAttr("data.vmc_org.my_org", "name", "j4acl4e3"),
 				),
 			},
 		},
@@ -27,10 +27,12 @@ func testAccDataSourceVmcOrgConfig() string {
 	return fmt.Sprintf(`
 provider "vmc" {
 	refresh_token = %q
+    csp_url       = "https://console-stg.cloud.vmware.com"
+    vmc_url = "https://stg.skyscraper.vmware.com"
 }
 	
 data "vmc_org" "my_org" {
-	id = "54937bce-8119-4fae-84f5-e5e066ee90e6"
+	id = "05e0a625-3293-41bb-a01f-35e762781c2a"
 }
 `,
 		os.Getenv("REFRESH_TOKEN"),
