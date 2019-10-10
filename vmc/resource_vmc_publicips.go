@@ -153,12 +153,13 @@ func resourcePublicIPRead(d *schema.ResourceData, m interface{}) error {
 	publicIPClient := publicips.NewPublicipsClientImpl(m.(client.Connector))
 
 	allocationID := d.Id()
+	fmt.Println(d.Get("allocation_id").(string))
 	fmt.Println("Inside PublicIP Read")
 	fmt.Println(allocationID)
 	orgID := d.Get("org_id").(string)
 	sddcID := d.Get("sddc_id").(string)
-	publicIP, err := publicIPClient.Get(orgID, sddcID, allocationID)
-
+	publicIP, err := publicIPClient.List(orgID,sddcID)
+	publicIP[0].
 	if err != nil {
 		return fmt.Errorf("error while getting public IP details for %s: %v", allocationID, err)
 	}
