@@ -1,7 +1,6 @@
 package vmc
 
 import (
-	"context"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -121,6 +120,10 @@ func resourceSddc() *schema.Resource {
 				ForceNew: true,
 				Default:  "us-west-2",
 			},
+			"cluster_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -136,6 +139,17 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 	vpcCidr := d.Get("vpc_cidr").(string)
 	numHost := d.Get("num_host").(int)
 	sddcType := d.Get("sddc_type").(string)
+
+	if !IsValidString(orgID){
+		return fmt.Errorf("org ID is a required parameter and cannot be empty")
+	}
+	if !IsValidString(sddcName){
+		return fmt.Errorf("SDDC Name is a required parameter and cannot be empty")
+	}
+	if numHost == 0 {
+		return fmt.Errorf("number of hosts is a required parameter and cannot be 0")
+	}
+
 	var sddcTypePtr *string
 	if sddcType != "" {
 		sddcTypePtr = &sddcType
@@ -204,6 +218,7 @@ func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(sddc.Id)
+
 	d.Set("name", sddc.Name)
 	d.Set("updated", sddc.Updated)
 	d.Set("user_id", sddc.UserId)
@@ -219,6 +234,7 @@ func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("account_link_state", sddc.AccountLinkState)
 	d.Set("sddc_access_state", sddc.SddcAccessState)
 	d.Set("sddc_type", sddc.SddcType)
+
 	return nil
 }
 

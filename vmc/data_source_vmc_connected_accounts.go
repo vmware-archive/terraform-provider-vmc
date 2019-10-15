@@ -36,8 +36,13 @@ func dataSourceVmcConnectedAccounts() *schema.Resource {
 
 func dataSourceVmcConnectedAccountsRead(d *schema.ResourceData, m interface{}) error {
 
+
 	orgID := d.Get("org_id").(string)
 	providerType := d.Get("provider_type").(string)
+
+    if !IsValidString(orgID){
+		return fmt.Errorf("org ID is a required parameter and cannot be empty")
+	}
 
 	connectedAccountsClient := connectedAccounts.NewConnectedAccountsClientImpl(m.(client.Connector))
 	accounts, err := connectedAccountsClient.Get(orgID, &providerType)

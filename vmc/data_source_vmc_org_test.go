@@ -30,9 +30,10 @@ provider "vmc" {
 }
 	
 data "vmc_org" "my_org" {
-	id = "54937bce-8119-4fae-84f5-e5e066ee90e6"
+	id = %q
 }
 `,
 		os.Getenv("REFRESH_TOKEN"),
+		os.Getenv("ORG_ID"),
 	)
 }

@@ -83,14 +83,10 @@ func testAccVmcSddcConfigBasic(sddcName string) string {
 	return fmt.Sprintf(`
 provider "vmc" {
 	refresh_token = %q
-	
-	# refresh_token = "ac5140ea-1749-4355-a892-56cff4893be0"
-	# vmc_url       = "https://stg.skyscraper.vmware.com/vmc/api"
-	# csp_url       = "https://console-stg.cloud.vmware.com"
 }
 	
 data "vmc_org" "my_org" {
-	id = "54937bce-8119-4fae-84f5-e5e066ee90e6"
+	id = %q
 }
 
 data "vmc_connected_accounts" "accounts" {
@@ -104,10 +100,10 @@ resource "vmc_sddc" "sddc_1" {
 	sddc_name = %q
 
 	vpc_cidr      = "10.2.0.0/16"
-	num_host      = 1
+	num_host      = 3
 	provider_type = "ZEROCLOUD"
 
-	region = "US_EAST_1"
+	region = "US_WEST_2"
 
 	vxlan_subnet = "192.168.1.0/24"
 
@@ -115,7 +111,6 @@ resource "vmc_sddc" "sddc_1" {
 	skip_creating_vxlan = false
 	sso_domain          = "vmc.local"
 
-	sddc_template_id    = ""
 	deployment_type = "SingleAZ"
 
 	# TODO raise exception here need to debug
@@ -128,6 +123,8 @@ resource "vmc_sddc" "sddc_1" {
 }
 `,
 		os.Getenv("REFRESH_TOKEN"),
+		os.Getenv("ORG_ID"),
 		sddcName,
+
 	)
 }

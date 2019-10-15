@@ -84,6 +84,14 @@ func dataSourceVmcCustomerSubnetsRead(d *schema.ResourceData, m interface{}) err
 	forceRefresh := d.Get("force_refresh").(bool)
 	instanceType := d.Get("instance_type").(string)
 
+	if !IsValidString(orgID) {
+		return fmt.Errorf("org ID is a required parameter and cannot be empty")
+	}
+
+	if !IsValidString(region){
+		return fmt.Errorf("region is a required parameter and cannot be empty")
+	}
+
 	compatibleSubnetsClient := compatibleSubnets.NewCompatibleSubnetsClientImpl(m.(client.Connector))
 	compatibleSubnets, err := compatibleSubnetsClient.Get(orgID, &accountID, &region, &sddcID, &forceRefresh, &instanceType, &sddcType, &numHosts)
 	ids := []string{}

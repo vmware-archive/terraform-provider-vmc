@@ -33,6 +33,9 @@ func dataSourceVmcOrg() *schema.Resource {
 
 func dataSourceVmcOrgRead(d *schema.ResourceData, m interface{}) error {
 	orgID := d.Get("id").(string)
+	if !IsValidString(orgID){
+		return fmt.Errorf("org ID is a required parameter and cannot be empty")
+	}
 
 	orgClient := orgs.NewOrgsClientImpl(m.(client.Connector))
 	org, err := orgClient.Get(orgID)
