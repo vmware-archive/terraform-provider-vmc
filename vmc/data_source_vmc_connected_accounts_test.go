@@ -15,8 +15,7 @@ func TestAccDataSourceVmcConnectedAccounts_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceVmcConnectedAccountsConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.vmc_connected_accounts.my_accounts", "ids.#", "1"),
-					resource.TestCheckResourceAttr("data.vmc_connected_accounts.my_accounts", "ids.0", "2968040b-5c14-373f-8353-79c3a28a673b"),
+					resource.TestCheckResourceAttr("data.vmc_connected_accounts.my_accounts", "ids.#", "0"),
 				),
 			},
 		},
@@ -27,6 +26,8 @@ func testAccDataSourceVmcConnectedAccountsConfig() string {
 	return fmt.Sprintf(`
 provider "vmc" {
 	refresh_token = %q
+    csp_url       = "https://console-stg.cloud.vmware.com"
+    vmc_url = "https://stg.skyscraper.vmware.com"
 }
 	
 data "vmc_org" "my_org" {

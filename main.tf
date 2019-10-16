@@ -20,6 +20,7 @@ data "vmc_customer_subnets" "my_subnets" {
   region               = "us-west-2"
 }
 
+
 resource "vmc_sddc" "sddc_1" {
   org_id = "${data.vmc_org.my_org.id}"
 
