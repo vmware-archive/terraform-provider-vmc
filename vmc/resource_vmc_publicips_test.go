@@ -95,9 +95,9 @@ data "vmc_org" "my_org" {
 
 resource "vmc_publicips" "publicip_1" {
 	org_id = "${data.vmc_org.my_org.id}"
-	sddc_id = "85de9b00-a442-448f-9ea8-bb10d8b377b4"
+	sddc_id = "4251fb8e-6fba-4880-aedb-ce3485873941"
 	names     = ["srege-test-VM-999"]
-	host_count = 3
+	host_count = 1
 	private_ips = ["10.105.167.133"]
 }
 `,

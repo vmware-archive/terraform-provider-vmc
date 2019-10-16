@@ -91,7 +91,7 @@ func resourcePublicIP() *schema.Resource {
 
 func resourcePublicIPCreate(d *schema.ResourceData, m interface{}) error {
 	connector := m.(client.Connector)
-	fmt.Println("Inside Create ")
+
 	orgID := d.Get("org_id").(string)
 	sddcID := d.Get("sddc_id").(string)
 	hostCount := (int64)(d.Get("host_count").(int))
@@ -101,7 +101,7 @@ func resourcePublicIPCreate(d *schema.ResourceData, m interface{}) error {
 	for i := 0; i < p.Len(); i++ {
 		singleVal := p.Index(i).Elem()
 		privateIPs = append(privateIPs,singleVal.String())
-		fmt.Println(privateIPs)
+
 	}
 
 	var workloadNames []string
@@ -109,8 +109,9 @@ func resourcePublicIPCreate(d *schema.ResourceData, m interface{}) error {
 	for i := 0; i < s.Len(); i++ {
 		singleVal := s.Index(i).Elem()
 		workloadNames = append(workloadNames,singleVal.String())
-		fmt.Println(workloadNames)
+
 	}
+
 	publicIPsClient := publicips.NewPublicipsClientImpl(connector)
 
 	var sddcAllocatePublicIpSpec = &model.SddcAllocatePublicIpSpec{
@@ -125,26 +126,18 @@ func resourcePublicIPCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error while creating public IP : %v", err)
 	}
 
-	// Wait until public IP is created
-	allocationId := task.ResourceId
-	fmt.Println("Inside create public IP")
-	fmt.Println(*allocationId)
-	fmt.Println(task.Id)
-	fmt.Println(*task.ResourceType)
-	fmt.Println(task.UserId)
-	d.SetId(*allocationId)
-
 	tasksClient := tasks.NewTasksClientImpl(connector)
 
 	return resource.Retry(300*time.Minute, func() *resource.RetryError {
 		task, err := tasksClient.Get(orgID, task.Id)
+
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error describing instance: %s", err))
 		}
 		if *task.Status != "FINISHED" {
 			return resource.RetryableError(fmt.Errorf("expected instance to be created but was in state %s", *task.Status))
 		}
-		return resource.NonRetryableError(resourceSddcRead(d, m))
+		return resource.NonRetryableError(resourcePublicIPRead(d, m))
 	})
 }
 
@@ -152,16 +145,16 @@ func resourcePublicIPRead(d *schema.ResourceData, m interface{}) error {
 
 	publicIPClient := publicips.NewPublicipsClientImpl(m.(client.Connector))
 
-	allocationID := d.Id()
-	fmt.Println(d.Get("allocation_id").(string))
-	fmt.Println("Inside PublicIP Read")
-	fmt.Println(allocationID)
 	orgID := d.Get("org_id").(string)
 	sddcID := d.Get("sddc_id").(string)
-	publicIP, err := publicIPClient.List(orgID,sddcID)
-	publicIP[0].
+	publicIPs, err := publicIPClient.List(orgID,sddcID)
+
+	allocationID :=publicIPs[0].AllocationId
+
+	publicIP , err := publicIPClient.Get(orgID,sddcID,*allocationID)
+
 	if err != nil {
-		return fmt.Errorf("error while getting public IP details for %s: %v", allocationID, err)
+		return fmt.Errorf("error while getting public IP details for %s: %v", *allocationID, err)
 	}
 
 	d.SetId(*publicIP.AllocationId)

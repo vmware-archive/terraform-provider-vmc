@@ -309,10 +309,7 @@ func expandAccountLinkSddcConfig(l []interface{}) []model.AccountLinkSddcConfig 
 		fmt.Println(c)
 		var subnetIds []string
 		for _, subnetID := range c["customer_subnet_ids"].([]interface{}) {
-
 			subnetIds = append(subnetIds, subnetID.(string))
-			fmt.Println("Inside SDDC creation ")
-			fmt.Println(subnetIds)
 		}
 		var connectedAccId = c["connected_account_id"].(string)
 		con := model.AccountLinkSddcConfig{
