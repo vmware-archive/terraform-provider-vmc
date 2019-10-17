@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/account_link/connectedAccounts"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/runtime/protocol/client"
-	"log"
 )
 
 func dataSourceVmcConnectedAccounts() *schema.Resource {
@@ -36,23 +34,21 @@ func dataSourceVmcConnectedAccounts() *schema.Resource {
 
 func dataSourceVmcConnectedAccountsRead(d *schema.ResourceData, m interface{}) error {
 
-
 	orgID := d.Get("org_id").(string)
 	providerType := d.Get("provider_type").(string)
 
-    if !IsValidString(orgID){
+	if !IsValidString(orgID) {
 		return fmt.Errorf("org ID is a required parameter and cannot be empty")
 	}
 
-	connectedAccountsClient := connectedAccounts.NewConnectedAccountsClientImpl(m.(client.Connector))
+	connector := (m.(*ConnectorWrapper)).Connector
+	connectedAccountsClient := connectedAccounts.NewConnectedAccountsClientImpl(connector)
 	accounts, err := connectedAccountsClient.Get(orgID, &providerType)
 
 	ids := []string{}
 	for _, account := range accounts {
 		ids = append(ids, account.Id)
 	}
-
-	log.Printf("[DEBUG] Connected accounts are %v\n", accounts)
 
 	if err != nil {
 		return fmt.Errorf("Error while reading accounts from org %q: %v", orgID, err)

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/account_link/compatibleSubnets"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/runtime/protocol/client"
 	"log"
 )
 
@@ -88,11 +87,12 @@ func dataSourceVmcCustomerSubnetsRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("org ID is a required parameter and cannot be empty")
 	}
 
-	if !IsValidString(region){
+	if !IsValidString(region) {
 		return fmt.Errorf("region is a required parameter and cannot be empty")
 	}
 
-	compatibleSubnetsClient := compatibleSubnets.NewCompatibleSubnetsClientImpl(m.(client.Connector))
+	connector := (m.(*ConnectorWrapper)).Connector
+	compatibleSubnetsClient := compatibleSubnets.NewCompatibleSubnetsClientImpl(connector)
 	compatibleSubnets, err := compatibleSubnetsClient.Get(orgID, &accountID, &region, &sddcID, &forceRefresh, &instanceType, &sddcType, &numHosts)
 	ids := []string{}
 	for _, value := range compatibleSubnets.VpcMap {

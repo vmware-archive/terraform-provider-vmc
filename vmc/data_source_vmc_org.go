@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/runtime/protocol/client"
 )
 
 func dataSourceVmcOrg() *schema.Resource {
@@ -33,11 +32,12 @@ func dataSourceVmcOrg() *schema.Resource {
 
 func dataSourceVmcOrgRead(d *schema.ResourceData, m interface{}) error {
 	orgID := d.Get("id").(string)
-	if !IsValidString(orgID){
+	if !IsValidString(orgID) {
 		return fmt.Errorf("org ID is a required parameter and cannot be empty")
 	}
 
-	orgClient := orgs.NewOrgsClientImpl(m.(client.Connector))
+	connector := (m.(*ConnectorWrapper)).Connector
+	orgClient := orgs.NewOrgsClientImpl(connector)
 	org, err := orgClient.Get(orgID)
 
 	if err != nil {

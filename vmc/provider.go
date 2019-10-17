@@ -10,6 +10,13 @@ import (
 	"time"
 )
 
+type ConnectorWrapper struct {
+	client.Connector
+	RefreshToken string
+	VmcURL       string
+	CspURL       string
+}
+
 // Provider for VMware VMC Console APIs. Returns terraform.ResourceProvider
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
@@ -31,8 +38,8 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"vmc_sddc": resourceSddc(),
-			"vmc_publicips" : resourcePublicIP(),
+			"vmc_sddc":      resourceSddc(),
+			"vmc_publicips": resourcePublicIP(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -51,9 +58,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	cspURL := d.Get("csp_url").(string)
 	connector, err := utils.NewVmcConnector(refreshToken, vmcURL, cspURL)
 	if err != nil {
-		return connector, fmt.Errorf("Error creating connector : %v ", err)
+		return &ConnectorWrapper{connector, refreshToken, vmcURL, cspURL}, fmt.Errorf("Error creating connector : %v ", err)
 	}
-	return connector, nil
+	return &ConnectorWrapper{connector, refreshToken, vmcURL, cspURL}, nil
 }
 
 func WaitForTask(connector client.Connector, orgID string, taskID string) error {

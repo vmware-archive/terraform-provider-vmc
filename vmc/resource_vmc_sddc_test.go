@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/sddcs"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/runtime/protocol/client"
 	"os"
 	"testing"
 )
@@ -37,7 +36,8 @@ func testCheckVmcSddcExists(name string) resource.TestCheckFunc {
 		sddcID := rs.Primary.Attributes["id"]
 		sddcName := rs.Primary.Attributes["sddc_name"]
 		orgID := rs.Primary.Attributes["org_id"]
-		connector := testAccProvider.Meta().(client.Connector)
+		connectorWrapper := testAccProvider.Meta().(*ConnectorWrapper)
+		connector := connectorWrapper.Connector
 		sddcClient := sddcs.NewSddcsClientImpl(connector)
 
 		sddc, err := sddcClient.Get(orgID, sddcID)
@@ -56,7 +56,8 @@ func testCheckVmcSddcExists(name string) resource.TestCheckFunc {
 
 func testCheckVmcSddcDestroy(s *terraform.State) error {
 
-	connector := testAccProvider.Meta().(client.Connector)
+	connectorWrapper := testAccProvider.Meta().(*ConnectorWrapper)
+	connector := connectorWrapper.Connector
 	sddcClient := sddcs.NewSddcsClientImpl(connector)
 
 	for _, rs := range s.RootModule().Resources {
@@ -129,6 +130,5 @@ resource "vmc_sddc" "sddc_1" {
 		os.Getenv("REFRESH_TOKEN"),
 		os.Getenv("ORG_ID"),
 		sddcName,
-
 	)
 }

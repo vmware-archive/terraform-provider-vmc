@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/utils"
+	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vapi/std/errors"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/model"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/sddcs"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/sddcs/esxs"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/tasks"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/runtime/protocol/client"
+	"log"
 	"time"
 )
 
@@ -129,8 +131,8 @@ func resourceSddc() *schema.Resource {
 }
 
 func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
-	connector := m.(client.Connector)
-	sddcClient := sddcs.NewSddcsClientImpl(connector)
+	connectorWrapper := m.(*ConnectorWrapper)
+	sddcClient := sddcs.NewSddcsClientImpl(connectorWrapper.Connector)
 
 	orgID := d.Get("org_id").(string)
 	storageCapacity := d.Get("storage_capacity").(int)
@@ -140,10 +142,10 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 	numHost := d.Get("num_host").(int)
 	sddcType := d.Get("sddc_type").(string)
 
-	if !IsValidString(orgID){
+	if !IsValidString(orgID) {
 		return fmt.Errorf("org ID is a required parameter and cannot be empty")
 	}
-	if !IsValidString(sddcName){
+	if !IsValidString(sddcName) {
 		return fmt.Errorf("SDDC Name is a required parameter and cannot be empty")
 	}
 	if numHost == 0 {
@@ -195,22 +197,32 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 	fmt.Println("Inside SDDC create ")
 	fmt.Println(*sddcID)
 	d.SetId(*sddcID)
-	tasksClient := tasks.NewTasksClientImpl(connector)
-
 	return resource.Retry(300*time.Minute, func() *resource.RetryError {
+		tasksClient := tasks.NewTasksClientImpl(connectorWrapper.Connector)
 		task, err := tasksClient.Get(orgID, task.Id)
 		if err != nil {
+			if err.Error() == (errors.Unauthenticated{}.Error()) {
+				log.Printf("Auth error", err.Error(), errors.Unauthenticated{}.Error())
+				connectorWrapper.Connector, err = utils.NewVmcConnector(connectorWrapper.RefreshToken, connectorWrapper.VmcURL, connectorWrapper.CspURL)
+				if err != nil {
+					return resource.NonRetryableError(fmt.Errorf("Error authenticating in CSP: %s", err))
+				}
+				return resource.RetryableError(fmt.Errorf("Instance creation still in progress"))
+			}
 			return resource.NonRetryableError(fmt.Errorf("Error describing instance: %s", err))
+
 		}
 		if *task.Status != "FINISHED" {
+			log.Printf("Expected instance to be created but was in state %s", *task.Status)
 			return resource.RetryableError(fmt.Errorf("Expected instance to be created but was in state %s", *task.Status))
 		}
+		log.Printf("creation complete, waiting for read")
 		return resource.NonRetryableError(resourceSddcRead(d, m))
 	})
 }
 
 func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
-	connector := m.(client.Connector)
+	connector := (m.(*ConnectorWrapper)).Connector
 	sddcClient := sddcs.NewSddcsClientImpl(connector)
 	sddcID := d.Id()
 	orgID := d.Get("org_id").(string)
@@ -241,7 +253,7 @@ func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
-	connector := m.(client.Connector)
+	connector := (m.(*ConnectorWrapper)).Connector
 	sddcClient := sddcs.NewSddcsClientImpl(connector)
 	sddcID := d.Id()
 	orgID := d.Get("org_id").(string)
@@ -260,7 +272,7 @@ func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
-	connector := m.(client.Connector)
+	connector := (m.(*ConnectorWrapper)).Connector
 	esxsClient := esxs.NewEsxsClientImpl(connector)
 	sddcID := d.Id()
 	orgID := d.Get("org_id").(string)

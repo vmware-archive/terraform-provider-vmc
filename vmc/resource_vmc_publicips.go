@@ -7,7 +7,6 @@ import (
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/model"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/sddcs/publicips"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/tasks"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/runtime/protocol/client"
 	"reflect"
 	"time"
 )
@@ -44,13 +43,13 @@ func resourcePublicIP() *schema.Resource {
 				Description: "ID of this resource",
 			},
 			"private_ips": {
-				Type: schema.TypeList,
+				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Required:    true,
 				Description: "ID of this resource",
 			},
 			"names": {
-				Type: schema.TypeList,
+				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Required:    true,
 				Description: "ID of this resource",
@@ -90,7 +89,7 @@ func resourcePublicIP() *schema.Resource {
 }
 
 func resourcePublicIPCreate(d *schema.ResourceData, m interface{}) error {
-	connector := m.(client.Connector)
+	connector := (m.(*ConnectorWrapper)).Connector
 
 	orgID := d.Get("org_id").(string)
 	sddcID := d.Get("sddc_id").(string)
@@ -100,7 +99,7 @@ func resourcePublicIPCreate(d *schema.ResourceData, m interface{}) error {
 	p := reflect.ValueOf(d.Get("private_ips"))
 	for i := 0; i < p.Len(); i++ {
 		singleVal := p.Index(i).Elem()
-		privateIPs = append(privateIPs,singleVal.String())
+		privateIPs = append(privateIPs, singleVal.String())
 
 	}
 
@@ -108,7 +107,7 @@ func resourcePublicIPCreate(d *schema.ResourceData, m interface{}) error {
 	s := reflect.ValueOf(d.Get("names"))
 	for i := 0; i < s.Len(); i++ {
 		singleVal := s.Index(i).Elem()
-		workloadNames = append(workloadNames,singleVal.String())
+		workloadNames = append(workloadNames, singleVal.String())
 
 	}
 
@@ -143,15 +142,16 @@ func resourcePublicIPCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourcePublicIPRead(d *schema.ResourceData, m interface{}) error {
 
-	publicIPClient := publicips.NewPublicipsClientImpl(m.(client.Connector))
+	connector := (m.(*ConnectorWrapper)).Connector
+	publicIPClient := publicips.NewPublicipsClientImpl(connector)
 
 	orgID := d.Get("org_id").(string)
 	sddcID := d.Get("sddc_id").(string)
-	publicIPs, err := publicIPClient.List(orgID,sddcID)
+	publicIPs, err := publicIPClient.List(orgID, sddcID)
 
-	allocationID :=publicIPs[0].AllocationId
+	allocationID := publicIPs[0].AllocationId
 
-	publicIP , err := publicIPClient.Get(orgID,sddcID,*allocationID)
+	publicIP, err := publicIPClient.Get(orgID, sddcID, *allocationID)
 
 	if err != nil {
 		return fmt.Errorf("error while getting public IP details for %s: %v", *allocationID, err)
@@ -168,7 +168,7 @@ func resourcePublicIPRead(d *schema.ResourceData, m interface{}) error {
 
 func resourcePublicIPDelete(d *schema.ResourceData, m interface{}) error {
 
-	connector := m.(client.Connector)
+	connector := (m.(*ConnectorWrapper)).Connector
 	allocationID := d.Id()
 	orgID := d.Get("org_id").(string)
 	sddcID := d.Get("sddc_id").(string)
@@ -188,7 +188,7 @@ func resourcePublicIPDelete(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePublicIPUpdate(d *schema.ResourceData, m interface{}) error {
-	connector := m.(client.Connector)
+	connector := (m.(*ConnectorWrapper)).Connector
 	publicIPClient := publicips.NewPublicipsClientImpl(connector)
 	allocationID := d.Id()
 	orgID := d.Get("org_id").(string)

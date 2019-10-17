@@ -6,14 +6,13 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/sddcs/publicips"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/runtime/protocol/client"
 	"os"
 	"testing"
 )
 
 func TestAccResourceVmcPublicIP_basic(t *testing.T) {
 	vmName := "terraform_test_vm_" + acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	vmList := []string {vmName}
+	vmList := []string{vmName}
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -39,10 +38,11 @@ func testCheckVmcPublicIPExists(name string) resource.TestCheckFunc {
 		sddcID := rs.Primary.Attributes["sddc_id"]
 		orgID := rs.Primary.Attributes["org_id"]
 		vmName := rs.Primary.Attributes["names"]
-		connector := testAccProvider.Meta().(client.Connector)
+		connectorWrapper := testAccProvider.Meta().(*ConnectorWrapper)
+		connector := connectorWrapper.Connector
 		publicIPClient := publicips.NewPublicipsClientImpl(connector)
 
-		publicIPList , err := publicIPClient.List(orgID, sddcID)
+		publicIPList, err := publicIPClient.List(orgID, sddcID)
 		if err != nil {
 			return fmt.Errorf("Bad: List on publicIP: %s", err)
 		}
@@ -51,7 +51,7 @@ func testCheckVmcPublicIPExists(name string) resource.TestCheckFunc {
 		if err != nil {
 			return fmt.Errorf("Bad: Get on publicIP: %s", err)
 		}
-        fmt.Println("Inside test for public IPs")
+		fmt.Println("Inside test for public IPs")
 		fmt.Println(vmName)
 		if *publicIP.Name != vmName {
 			return fmt.Errorf("Bad: Public IP %q does not exist", *allocationID)
@@ -65,7 +65,8 @@ func testCheckVmcPublicIPExists(name string) resource.TestCheckFunc {
 /*
 func testCheckVmcSddcDestroy(s *terraform.State) error {
 
-	connector := testAccProvider.Meta().(client.Connector)
+	connectorWrapper := testAccProvider.Meta().(*ConnectorWrapper)
+	connector := connectorWrapper.Connector
 	sddcClient := sddcs.NewSddcsClientImpl(connector)
 
 	for _, rs := range s.RootModule().Resources {
