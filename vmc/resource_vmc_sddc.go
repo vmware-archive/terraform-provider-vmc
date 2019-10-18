@@ -194,7 +194,6 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Wait until Sddc is created
 	sddcID := task.ResourceId
-	fmt.Println("Inside SDDC create ")
 	fmt.Println(*sddcID)
 	d.SetId(*sddcID)
 	return resource.Retry(300*time.Minute, func() *resource.RetryError {
@@ -202,7 +201,7 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 		task, err := tasksClient.Get(orgID, task.Id)
 		if err != nil {
 			if err.Error() == (errors.Unauthenticated{}.Error()) {
-				log.Printf("Auth error", err.Error(), errors.Unauthenticated{}.Error())
+				log.Print("Auth error", err.Error(), errors.Unauthenticated{}.Error())
 				connectorWrapper.Connector, err = utils.NewVmcConnector(connectorWrapper.RefreshToken, connectorWrapper.VmcURL, connectorWrapper.CspURL)
 				if err != nil {
 					return resource.NonRetryableError(fmt.Errorf("Error authenticating in CSP: %s", err))
