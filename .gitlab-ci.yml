@@ -1,8 +1,7 @@
 run_accept_tests:
     tags: [docker_runner_2]
     image: ubuntu:latest
-    only:
-        - pushes
+    when: manual
     script:
         # download repo and copy to go src folder
         - apt-get update
@@ -32,6 +31,7 @@ run_accept_tests:
 
         # build the provider
         - cd $GOPATH/src/gitlab.eng.vmware.com/vapi-sdk/terraform-provider-vmc
+        - git checkout features/usingVAPIBindings
         - go get
         - go build -o terraform-provider-vmc
         - terraform init
