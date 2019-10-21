@@ -1,7 +1,8 @@
 run_accept_tests:
     tags: [docker_runner_2]
     image: ubuntu:latest
-    when: manual
+    only: 
+      - pushes
     script:
         # download repo and copy to go src folder
         - apt-get update
