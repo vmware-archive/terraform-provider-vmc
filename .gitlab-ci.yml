@@ -36,7 +36,7 @@ run_accept_tests:
         - go get
         - go build -o terraform-provider-vmc
         - terraform init
-        - export REFRESH_TOKEN=ib6Cs9NySciEOwfsEQnqPehbnUqYOf1J36KZB2mjkj5cvjaUlnfyNisxHDT0exkr
+        - export REFRESH_TOKEN=SPjMe01QUkSx0fulaR7NFBIqQi2MfYQ53VPPNin8jbfXF5qgAg6DmkHdBDzmsiDI
         - make testacc
 
 
