@@ -32,11 +32,12 @@ run_accept_tests:
 
         # build the provider
         - cd $GOPATH/src/gitlab.eng.vmware.com/vapi-sdk/terraform-provider-vmc
-        #- git checkout features/usingVAPIBindings
+        - git checkout $CI_COMMIT_REF_NAME
         - go get
         - go build -o terraform-provider-vmc
         - terraform init
-        - export REFRESH_TOKEN=ib6Cs9NySciEOwfsEQnqPehbnUqYOf1J36KZB2mjkj5cvjaUlnfyNisxHDT0exkr
+        - export REFRESH_TOKEN=SPjMe01QUkSx0fulaR7NFBIqQi2MfYQ53VPPNin8jbfXF5qgAg6DmkHdBDzmsiDI
+        - export ORG_ID=05e0a625-3293-41bb-a01f-35e762781c2a
         - make testacc
 
 
