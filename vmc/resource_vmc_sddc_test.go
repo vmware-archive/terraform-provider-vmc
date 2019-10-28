@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccResourceVmcSddc_basic(t *testing.T) {
-	sddcName := "srege_test_sddc_" + acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	sddcName := "terraform_test_sddc_" + acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
