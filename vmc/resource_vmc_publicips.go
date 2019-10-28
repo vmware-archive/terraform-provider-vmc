@@ -174,22 +174,78 @@ func resourcePublicIPUpdate(d *schema.ResourceData, m interface{}) error {
 	orgID := d.Get("org_id").(string)
 	sddcID := d.Get("sddc_id").(string)
 
-	// Updating the workload VM name
-	if d.HasChange("name") {
+	action := d.Get("name").(string)
 
-		newPublicIPName := d.Get("name").(string)
-		privateIP := d.Get("private_ip").(string)
-		action := "rename"
-		newSDDCPublicIP := model.SddcPublicIp{
-			Name:                &newPublicIPName,
-			AssociatedPrivateIp: &privateIP,
-		}
-		_, err := publicIPClient.Update(orgID, sddcID, allocationID, action, newSDDCPublicIP)
+	switch action {
+	case "rename":
+		{
+			if d.HasChange("name") {
 
-		if err != nil {
-			return fmt.Errorf("error while updating public IP's name %v", err)
+				newPublicIPName := d.Get("name").(string)
+				newSDDCPublicIP := model.SddcPublicIp{
+					Name: &newPublicIPName,
+				}
+				_, err := publicIPClient.Update(orgID, sddcID, allocationID, action, newSDDCPublicIP)
+
+				if err != nil {
+					return fmt.Errorf("error while updating public IP for rename action type  : %v", err)
+				}
+				d.Set("name", d.Get("name").(string))
+			}
 		}
-		d.Set("name", d.Get("name").(string))
+
+	case "attach":
+		{
+			if d.HasChange("associated_private_ip") {
+				newPublicIPName := d.Get("public_ip").(string)
+				associatedPrivateIP := d.Get("associated_private_ip").(string)
+				newSDDCPublicIP := model.SddcPublicIp{
+					PublicIp:            newPublicIPName,
+					AssociatedPrivateIp: &associatedPrivateIP,
+				}
+
+				_, err := publicIPClient.Update(orgID, sddcID, allocationID, action, newSDDCPublicIP)
+				if err != nil {
+					return fmt.Errorf("error while updating public IP for attach action type : %v", err)
+				}
+				d.Set("associated_private_ip", d.Get("associated_private_ip").(string))
+			}
+		}
+	case "detach":
+		{
+
+			newPublicIPName := d.Get("public_ip").(string)
+			associatedPrivateIP := d.Get("associated_private_ip").(string)
+			newSDDCPublicIP := model.SddcPublicIp{
+				PublicIp:            newPublicIPName,
+				AssociatedPrivateIp: &associatedPrivateIP,
+			}
+
+			_, err := publicIPClient.Update(orgID, sddcID, allocationID, action, newSDDCPublicIP)
+			if err != nil {
+				return fmt.Errorf("error while updating public IP for detach action type : %v", err)
+			}
+			d.Set("associated_private_ip", d.Get("associated_private_ip").(string))
+
+		}
+	case "reattach":
+		{
+			if d.HasChange("associated_private_ip") {
+				newPublicIPName := d.Get("public_ip").(string)
+				associatedPrivateIP := d.Get("associated_private_ip").(string)
+				newSDDCPublicIP := model.SddcPublicIp{
+					PublicIp:            newPublicIPName,
+					AssociatedPrivateIp: &associatedPrivateIP,
+				}
+
+				_, err := publicIPClient.Update(orgID, sddcID, allocationID, action, newSDDCPublicIP)
+				if err != nil {
+					return fmt.Errorf("error while updating public IP for reattach action type : %v", err)
+				}
+				d.Set("associated_private_ip", d.Get("associated_private_ip").(string))
+			}
+		}
 	}
-	return resourcePublicIPRead(d, m)
+	return resourceSddcRead(d, m)
+
 }
