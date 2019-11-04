@@ -45,12 +45,12 @@ func resourcePublicIP() *schema.Resource {
 			"private_ip": {
 				Type:        schema.TypeString,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Required:    true,
+				Optional:    true,
 				Description: "ID of this resource",
 			},
 			"name": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "ID of this resource",
 			},
 			"dnat_rule_id": {
@@ -110,7 +110,7 @@ func resourcePublicIPCreate(d *schema.ResourceData, m interface{}) error {
 			log.Print("got ips ", len(publicIPs))
 			for i := 0; i < len(publicIPs); i++ {
 				singleVal := publicIPs[i]
-				if d.Get("name").(string) == *(singleVal.Name) {
+				if d.Get("private_ip").(string) == *(singleVal.AssociatedPrivateIp) {
 					d.SetId(*(singleVal.AllocationId))
 					break
 				}
@@ -149,22 +149,24 @@ func resourcePublicIPRead(d *schema.ResourceData, m interface{}) error {
 func resourcePublicIPDelete(d *schema.ResourceData, m interface{}) error {
 
 	connector := (m.(*ConnectorWrapper)).Connector
+	publicIPClient := publicips.NewPublicipsClientImpl(connector)
+
 	allocationID := d.Id()
 	orgID := d.Get("org_id").(string)
 	sddcID := d.Get("sddc_id").(string)
-	publicIPClient := publicips.NewPublicipsClientImpl(connector)
-	task, err := publicIPClient.Delete(orgID, sddcID, allocationID)
-	if err != nil {
-		return fmt.Errorf("error while deleting public IP %s: %v", allocationID, err)
-	}
+	publicIP := d.Get("public_ip").(string)
 
-	err = WaitForTask(connector, orgID, task.Id)
-
-	if err != nil {
-		return fmt.Errorf("error while waiting for task %s: %v", task.Id, err)
-	}
-	d.SetId("")
-	return nil
+	return resource.Retry(300*time.Minute, func() *resource.RetryError {
+		task, err := publicIPClient.Delete(orgID, sddcID, allocationID)
+		if err != nil {
+			return resource.NonRetryableError(fmt.Errorf("Error while deleting public IP %s: %v", publicIP, err))
+		}
+		if *task.Status != "FINISHED" {
+			return resource.RetryableError(fmt.Errorf("Expected instance to be deleted but was in state %s", *task.Status))
+		}
+		d.SetId("")
+		return resource.NonRetryableError(nil)
+	})
 }
 
 func resourcePublicIPUpdate(d *schema.ResourceData, m interface{}) error {
@@ -173,79 +175,69 @@ func resourcePublicIPUpdate(d *schema.ResourceData, m interface{}) error {
 	allocationID := d.Id()
 	orgID := d.Get("org_id").(string)
 	sddcID := d.Get("sddc_id").(string)
+	publicIPName := d.Get("name").(string)
 
-	action := d.Get("name").(string)
+	if d.HasChange("private_ip") {
 
-	switch action {
-	case "rename":
-		{
-			if d.HasChange("name") {
-
-				newPublicIPName := d.Get("name").(string)
-				newSDDCPublicIP := model.SddcPublicIp{
-					Name: &newPublicIPName,
-				}
-				_, err := publicIPClient.Update(orgID, sddcID, allocationID, action, newSDDCPublicIP)
-
-				if err != nil {
-					return fmt.Errorf("error while updating public IP for rename action type  : %v", err)
-				}
-				d.Set("name", d.Get("name").(string))
-			}
-		}
-
-	case "attach":
-		{
-			if d.HasChange("associated_private_ip") {
-				newPublicIPName := d.Get("public_ip").(string)
-				associatedPrivateIP := d.Get("associated_private_ip").(string)
-				newSDDCPublicIP := model.SddcPublicIp{
-					PublicIp:            newPublicIPName,
-					AssociatedPrivateIp: &associatedPrivateIP,
-				}
-
-				_, err := publicIPClient.Update(orgID, sddcID, allocationID, action, newSDDCPublicIP)
-				if err != nil {
-					return fmt.Errorf("error while updating public IP for attach action type : %v", err)
-				}
-				d.Set("associated_private_ip", d.Get("associated_private_ip").(string))
-			}
-		}
-	case "detach":
-		{
-
-			newPublicIPName := d.Get("public_ip").(string)
-			associatedPrivateIP := d.Get("associated_private_ip").(string)
+		if d.Get("private_ip") == "" {
+			//detach privateIP case
+			publicIP := d.Get("public_ip").(string)
 			newSDDCPublicIP := model.SddcPublicIp{
-				PublicIp:            newPublicIPName,
-				AssociatedPrivateIp: &associatedPrivateIP,
+				PublicIp: publicIP,
+				Name:     &publicIPName,
 			}
+			task, err := publicIPClient.Update(orgID, sddcID, allocationID, "detach", newSDDCPublicIP)
+			log.Print("into detach private ip")
 
-			_, err := publicIPClient.Update(orgID, sddcID, allocationID, action, newSDDCPublicIP)
 			if err != nil {
-				return fmt.Errorf("error while updating public IP for detach action type : %v", err)
+				return fmt.Errorf("error while detaching the public ip: %v", err)
 			}
-			d.Set("associated_private_ip", d.Get("associated_private_ip").(string))
+			err = WaitForTask(connector, orgID, task.Id)
+			if err != nil {
+				return fmt.Errorf("Error while waiting for the detach task %s: %v", task.Id, err)
+			}
+		} else {
+			//reattach privateIP case
+			publicIP := d.Get("public_ip").(string)
+			associatedPrivateIP := d.Get("private_ip").(string)
+			newSDDCPublicIP := model.SddcPublicIp{
+				PublicIp:            publicIP,
+				AssociatedPrivateIp: &associatedPrivateIP,
+				Name:                &publicIPName,
+			}
+			task, err := publicIPClient.Update(orgID, sddcID, allocationID, "reattach", newSDDCPublicIP)
+			log.Print("into reattach private ip")
 
-		}
-	case "reattach":
-		{
-			if d.HasChange("associated_private_ip") {
-				newPublicIPName := d.Get("public_ip").(string)
-				associatedPrivateIP := d.Get("associated_private_ip").(string)
-				newSDDCPublicIP := model.SddcPublicIp{
-					PublicIp:            newPublicIPName,
-					AssociatedPrivateIp: &associatedPrivateIP,
-				}
-
-				_, err := publicIPClient.Update(orgID, sddcID, allocationID, action, newSDDCPublicIP)
-				if err != nil {
-					return fmt.Errorf("error while updating public IP for reattach action type : %v", err)
-				}
-				d.Set("associated_private_ip", d.Get("associated_private_ip").(string))
+			if err != nil {
+				return fmt.Errorf("error while reattaching the public IP : %v", err)
+			}
+			err = WaitForTask(connector, orgID, task.Id)
+			if err != nil {
+				return fmt.Errorf("Error while waiting for the reattach task %s: %v", task.Id, err)
 			}
 		}
+		d.Set("private_ip", d.Get("private_ip").(string))
+
+	} else if d.HasChange("name") {
+
+		newPublicIPName := d.Get("name").(string)
+		associatedPrivateIP := d.Get("private_ip").(string)
+		newSDDCPublicIP := model.SddcPublicIp{
+			Name:                &newPublicIPName,
+			AssociatedPrivateIp: &associatedPrivateIP,
+		}
+		task, err := publicIPClient.Update(orgID, sddcID, allocationID, "rename", newSDDCPublicIP)
+
+		if err != nil {
+			return fmt.Errorf("error while updating public IP for rename action type  : %v", err)
+		}
+		err = WaitForTask(connector, orgID, task.Id)
+		if err != nil {
+			return fmt.Errorf("Error while waiting for the rename task %s: %v", task.Id, err)
+		}
+		d.Set("name", d.Get("name").(string))
 	}
-	return resourceSddcRead(d, m)
+
+	return resourcePublicIPRead(d, m)
 
 }

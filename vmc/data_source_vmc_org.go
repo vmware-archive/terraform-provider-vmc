@@ -32,7 +32,7 @@ func dataSourceVmcOrg() *schema.Resource {
 
 func dataSourceVmcOrgRead(d *schema.ResourceData, m interface{}) error {
 	orgID := d.Get("id").(string)
-	if !IsValidString(orgID) {
+	if orgID == "" {
 		return fmt.Errorf("org ID is a required parameter and cannot be empty")
 	}
 

@@ -37,7 +37,7 @@ func dataSourceVmcConnectedAccountsRead(d *schema.ResourceData, m interface{}) e
 	orgID := d.Get("org_id").(string)
 	providerType := d.Get("provider_type").(string)
 
-	if !IsValidString(orgID) {
+	if orgID == "" {
 		return fmt.Errorf("org ID is a required parameter and cannot be empty")
 	}
 

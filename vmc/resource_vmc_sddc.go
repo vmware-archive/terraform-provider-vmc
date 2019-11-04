@@ -142,10 +142,10 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 	numHost := d.Get("num_host").(int)
 	sddcType := d.Get("sddc_type").(string)
 
-	if !IsValidString(orgID) {
+	if orgID == "" {
 		return fmt.Errorf("org ID is a required parameter and cannot be empty")
 	}
-	if !IsValidString(sddcName) {
+	if sddcName == "" {
 		return fmt.Errorf("SDDC Name is a required parameter and cannot be empty")
 	}
 	if numHost == 0 {
@@ -256,18 +256,18 @@ func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
 	sddcClient := sddcs.NewSddcsClientImpl(connector)
 	sddcID := d.Id()
 	orgID := d.Get("org_id").(string)
-	task, err := sddcClient.Delete(orgID, sddcID, nil, nil, nil)
-	if err != nil {
-		return fmt.Errorf("Error while deleting sddc %s: %v", sddcID, err)
-	}
 
-	err = WaitForTask(connector, orgID, task.Id)
-
-	if err != nil {
-		return fmt.Errorf("Error while waiting for task %s: %v", task.Id, err)
-	}
-	d.SetId("")
-	return nil
+	return resource.Retry(300*time.Minute, func() *resource.RetryError {
+		task, err := sddcClient.Delete(orgID, sddcID, nil, nil, nil)
+		if err != nil {
+			return resource.NonRetryableError(fmt.Errorf("Error while deleting sddc %s: %v", sddcID, err))
+		}
+		if *task.Status != "FINISHED" {
+			return resource.RetryableError(fmt.Errorf("Expected instance to be deleted but was in state %s", *task.Status))
+		}
+		d.SetId("")
+		return resource.NonRetryableError(nil)
+	})
 }
 
 func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
