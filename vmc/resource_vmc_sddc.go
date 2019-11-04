@@ -257,8 +257,14 @@ func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
 	sddcID := d.Id()
 	orgID := d.Get("org_id").(string)
 
+	task, err := sddcClient.Delete(orgID, sddcID, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf("Error while deleting sddc %s: %v", sddcID, err)
+	}
+
 	return resource.Retry(300*time.Minute, func() *resource.RetryError {
-		task, err := sddcClient.Delete(orgID, sddcID, nil, nil, nil)
+		tasksClient := tasks.NewTasksClientImpl(connector)
+		task, err := tasksClient.Get(orgID, task.Id)
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("Error while deleting sddc %s: %v", sddcID, err))
 		}
