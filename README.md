@@ -146,4 +146,4 @@ $ make testacc
 
 Copyright © 2019 VMware, Inc.
 
-The VMC Terraform provider is available under [MPL2.0 license]
+The VMC Terraform provider is available under [MPL2.0 license](https://github.com/vmware/terraform-provider-for-vmc/LICENSE.txt).
