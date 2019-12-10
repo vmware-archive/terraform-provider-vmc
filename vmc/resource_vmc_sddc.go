@@ -7,11 +7,9 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vapi/std/errors"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/model"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/sddcs"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/sddcs/esxs"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/tasks"
+	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs"
+	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/model"
+	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs/sddcs"
 	"log"
 	"time"
 )
@@ -145,7 +143,7 @@ func resourceSddc() *schema.Resource {
 
 func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 	connectorWrapper := m.(*ConnectorWrapper)
-	sddcClient := sddcs.NewSddcsClientImpl(connectorWrapper.Connector)
+	sddcClient := orgs.NewDefaultSddcsClient(connectorWrapper)
 
 	orgID := d.Get("org_id").(string)
 	storageCapacity := d.Get("storage_capacity").(int)
@@ -181,7 +179,7 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 	deploymentType := d.Get("deployment_type").(string)
 	region := d.Get("region").(string)
 	accountLinkSddcConfig := expandAccountLinkSddcConfig(d.Get("account_link_sddc_config").([]interface{}))
-	hostInstanceType := model.HostInstanceTypes(d.Get("host_instance_type").(string))
+	//hostInstanceType := model.HostInstanceTypes(d.Get("host_instance_type").(string))
 
 	var awsSddcConfig = &model.AwsSddcConfig{
 		StorageCapacity:       &storageCapacityConverted,
@@ -198,18 +196,18 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 		SddcTemplateId:        &sddcTemplateID,
 		DeploymentType:        &deploymentType,
 		Region:                region,
-		HostInstanceType:      &hostInstanceType,
+	//	HostInstanceType:      &hostInstanceType,
 	}
 
 	// Create a Sddc
-	task, err := sddcClient.Create(orgID, *awsSddcConfig, nil)
+	err := sddcClient.Create(orgID, *awsSddcConfig, nil)
 	if err != nil {
 		return fmt.Errorf("Error while creating sddc %s: %v", sddcName, err)
 	}
 
 	// Wait until Sddc is created
-	sddcID := task.ResourceId
-	d.SetId(*sddcID)
+
+	/*d.SetId(*sddcID)
 	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		tasksClient := tasks.NewTasksClientImpl(connectorWrapper.Connector)
 		task, err := tasksClient.Get(orgID, task.Id)
@@ -229,12 +227,13 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 			return resource.RetryableError(fmt.Errorf("Expected instance to be created but was in state %s", *task.Status))
 		}
 		return resource.NonRetryableError(resourceSddcRead(d, m))
-	})
+	})*/
+	return nil
 }
 
 func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
-	sddcClient := sddcs.NewSddcsClientImpl(connector)
+	sddcClient := orgs.NewDefaultSddcsClient(connector)
 	sddcID := d.Id()
 	orgID := d.Get("org_id").(string)
 	sddc, err := sddcClient.Get(orgID, sddcID)
@@ -265,7 +264,7 @@ func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
-	sddcClient := sddcs.NewSddcsClientImpl(connector)
+	sddcClient := orgs.NewDefaultSddcsClient(connector)
 	sddcID := d.Id()
 	orgID := d.Get("org_id").(string)
 
@@ -273,7 +272,7 @@ func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error while deleting sddc %s: %v", sddcID, err)
 	}
-	tasksClient := tasks.NewTasksClientImpl(connector)
+	tasksClient := orgs.NewDefaultTasksClient(connector)
 	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		task, err := tasksClient.Get(orgID, task.Id)
 		if err != nil {
@@ -289,7 +288,7 @@ func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
 
 func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
-	esxsClient := esxs.NewEsxsClientImpl(connector)
+	esxsClient := sddcs.NewDefaultEsxsClient(connector)
 	sddcID := d.Id()
 	orgID := d.Get("org_id").(string)
 
@@ -316,7 +315,7 @@ func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			return fmt.Errorf("Error while updating number of host for SDDC %s: %v", sddcID, err)
 		}
-		tasksClient := tasks.NewTasksClientImpl(connector)
+		tasksClient := orgs.NewDefaultTasksClient(connector)
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
 			task, err := tasksClient.Get(orgID, task.Id)
 			if err != nil {
@@ -333,7 +332,7 @@ func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	// Update sddc name
 	if d.HasChange("sddc_name") {
-		sddcClient := sddcs.NewSddcsClientImpl(connector)
+		sddcClient := orgs.NewDefaultSddcsClient(connector)
 		newSDDCName := d.Get("sddc_name").(string)
 		sddcPatchRequest := model.SddcPatchRequest{
 			Name: &newSDDCName,
