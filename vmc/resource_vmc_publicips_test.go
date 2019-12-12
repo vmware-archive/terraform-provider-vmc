@@ -52,7 +52,8 @@ func testCheckVmcPublicIPExists(name string, publicIPResource *model.SddcPublicI
 		connectorWrapper := testAccProvider.Meta().(*ConnectorWrapper)
 		connector := connectorWrapper.Connector
 		publicIPClient := sddcs.NewDefaultPublicipsClient(connector)
-		publicIPResource, err := publicIPClient.Get(orgID, sddcID, allocationID)
+		var err error
+		*publicIPResource, err = publicIPClient.Get(orgID, sddcID, allocationID)
 		if err != nil {
 			return fmt.Errorf("Bad: Get on publicIP API: %s", err)
 		}

@@ -410,7 +410,7 @@ func expandAccountLinkSddcConfig(l []interface{}) []model.AccountLinkSddcConfig 
 }
 
 func getSDDC(connector client.Connector, orgID string, sddcID string) (model.Sddc, error) {
-	sddcClient := sddcs.NewSddcsClientImpl(connector)
+	sddcClient := orgs.NewDefaultSddcsClient(connector)
 	sddc, err := sddcClient.Get(orgID, sddcID)
 	return sddc, err
 }

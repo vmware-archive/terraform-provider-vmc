@@ -51,7 +51,8 @@ func testCheckVmcSddcExists(name string, sddcResource *model.Sddc) resource.Test
 		connector := connectorWrapper.Connector
 
 		sddcClient := orgs.NewDefaultSddcsClient(connector)
-		sddcResource, err := sddcClient.Get(orgID, sddcID)
+		var err error
+		*sddcResource, err = sddcClient.Get(orgID, sddcID)
 		if err != nil {
 			return fmt.Errorf("Bad: Get on sddcApi: %s", err)
 		}
