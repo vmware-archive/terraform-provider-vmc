@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs"
 	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/model"
+	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs"
 	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs/sddcs"
 	"log"
 	"time"
@@ -214,11 +214,11 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 		SddcTemplateId:        &sddcTemplateID,
 		DeploymentType:        &deploymentType,
 		Region:                region,
-	    HostInstanceType:      &hostInstanceType,
+		HostInstanceType:      &hostInstanceType,
 	}
 
 	// Create a Sddc
-	task, err := sddcClient.Create(orgID,*awsSddcConfig,nil)
+	task, err := sddcClient.Create(orgID, *awsSddcConfig, nil)
 	if err != nil {
 		return fmt.Errorf("Error while creating sddc %s: %v", sddcName, err)
 	}

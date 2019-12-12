@@ -46,7 +46,7 @@ func dataSourceVmcConnectedAccountsRead(d *schema.ResourceData, m interface{}) e
 
 	connector := (m.(*ConnectorWrapper)).Connector
 	defaultConnectedAccountsClient := account_link.NewDefaultConnectedAccountsClient(connector)
-	accounts,err := defaultConnectedAccountsClient.Get(orgID,&providerType)
+	accounts, err := defaultConnectedAccountsClient.Get(orgID, &providerType)
 
 	ids := []string{}
 	for _, account := range accounts {
