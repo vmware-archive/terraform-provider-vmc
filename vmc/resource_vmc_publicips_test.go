@@ -50,10 +50,13 @@ func testCheckVmcPublicIPExists(name string, publicIPResource *model.SddcPublicI
 		connectorWrapper := testAccProvider.Meta().(*ConnectorWrapper)
 		connector := connectorWrapper.Connector
 <<<<<<< HEAD
+<<<<<<< HEAD
 		publicIPClient := publicips.NewPublicipsClientImpl(connector)
 		var err error
 		*publicIPResource, err = publicIPClient.Get(orgID, sddcID, allocationID)
 =======
+=======
+>>>>>>> f6a49a229c78916a552bb4d507611a68457006b2
 		publicIPClient := sddcs.NewDefaultPublicipsClient(connector)
 
 		publicIP, err := publicIPClient.Get(orgID, sddcID, allocationID)

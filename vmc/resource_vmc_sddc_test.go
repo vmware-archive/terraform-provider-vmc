@@ -49,10 +49,13 @@ func testCheckVmcSddcExists(name string, sddcResource *model.Sddc) resource.Test
 		connectorWrapper := testAccProvider.Meta().(*ConnectorWrapper)
 		connector := connectorWrapper.Connector
 <<<<<<< HEAD
+<<<<<<< HEAD
 		sddcClient := sddcs.NewSddcsClientImpl(connector)
 		var err error
 		*sddcResource, err = sddcClient.Get(orgID, sddcID)
 =======
+=======
+>>>>>>> f6a49a229c78916a552bb4d507611a68457006b2
 		sddcClient := orgs.NewDefaultSddcsClient(connector)
 
 		sddc, err := sddcClient.Get(orgID, sddcID)
