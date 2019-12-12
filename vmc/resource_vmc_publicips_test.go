@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs/sddcs"
+	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/model"
+	"net"
 	"os"
 	"testing"
 )
@@ -49,18 +51,8 @@ func testCheckVmcPublicIPExists(name string, publicIPResource *model.SddcPublicI
 		}
 		connectorWrapper := testAccProvider.Meta().(*ConnectorWrapper)
 		connector := connectorWrapper.Connector
-<<<<<<< HEAD
-<<<<<<< HEAD
-		publicIPClient := publicips.NewPublicipsClientImpl(connector)
-		var err error
-		*publicIPResource, err = publicIPClient.Get(orgID, sddcID, allocationID)
-=======
-=======
->>>>>>> f6a49a229c78916a552bb4d507611a68457006b2
 		publicIPClient := sddcs.NewDefaultPublicipsClient(connector)
-
-		publicIP, err := publicIPClient.Get(orgID, sddcID, allocationID)
->>>>>>> Updated code to use the latest VMC Go SDK
+		publicIPResource, err := publicIPClient.Get(orgID, sddcID, allocationID)
 		if err != nil {
 			return fmt.Errorf("Bad: Get on publicIP API: %s", err)
 		}

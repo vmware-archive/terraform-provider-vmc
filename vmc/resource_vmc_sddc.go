@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs"
 	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs/sddcs"
@@ -250,14 +251,6 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	sddcClient := orgs.NewDefaultSddcsClient(connector)
->>>>>>> WIP : Made changes to use VMC Go SDK
-=======
-	sddcClient := orgs.NewDefaultSddcsClient(connector)
->>>>>>> f6a49a229c78916a552bb4d507611a68457006b2
 	sddcID := d.Id()
 	orgID := d.Get("org_id").(string)
 	sddc, err := getSDDC(connector, orgID, sddcID)
