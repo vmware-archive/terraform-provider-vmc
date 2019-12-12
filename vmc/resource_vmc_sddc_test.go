@@ -8,9 +8,8 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vapi/std/errors"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/model"
-	"gitlab.eng.vmware.com/het/vmware-vmc-sdk/vapi/bindings/vmc/orgs/sddcs"
+	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs"
 	"os"
 	"testing"
 )
@@ -49,9 +48,15 @@ func testCheckVmcSddcExists(name string, sddcResource *model.Sddc) resource.Test
 		orgID := rs.Primary.Attributes["org_id"]
 		connectorWrapper := testAccProvider.Meta().(*ConnectorWrapper)
 		connector := connectorWrapper.Connector
+<<<<<<< HEAD
 		sddcClient := sddcs.NewSddcsClientImpl(connector)
 		var err error
 		*sddcResource, err = sddcClient.Get(orgID, sddcID)
+=======
+		sddcClient := orgs.NewDefaultSddcsClient(connector)
+
+		sddc, err := sddcClient.Get(orgID, sddcID)
+>>>>>>> Updated code to use the latest VMC Go SDK
 		if err != nil {
 			return fmt.Errorf("Bad: Get on sddcApi: %s", err)
 		}
@@ -79,7 +84,7 @@ func testCheckVmcSddcDestroy(s *terraform.State) error {
 
 	connectorWrapper := testAccProvider.Meta().(*ConnectorWrapper)
 	connector := connectorWrapper.Connector
-	sddcClient := sddcs.NewSddcsClientImpl(connector)
+	sddcClient := orgs.NewDefaultSddcsClient(connector)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "vmc_sddc" {

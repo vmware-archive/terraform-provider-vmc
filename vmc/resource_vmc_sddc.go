@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs"
 	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/vmc/orgs/sddcs"
@@ -195,7 +196,7 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 	deploymentType := d.Get("deployment_type").(string)
 	region := d.Get("region").(string)
 	accountLinkSddcConfig := expandAccountLinkSddcConfig(d.Get("account_link_sddc_config").([]interface{}))
-	//hostInstanceType := model.HostInstanceTypes(d.Get("host_instance_type").(string))
+	hostInstanceType := model.HostInstanceTypes(d.Get("host_instance_type").(string))
 
 	var awsSddcConfig = &model.AwsSddcConfig{
 		StorageCapacity:       &storageCapacityConverted,
@@ -212,20 +213,20 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 		SddcTemplateId:        &sddcTemplateID,
 		DeploymentType:        &deploymentType,
 		Region:                region,
-	//	HostInstanceType:      &hostInstanceType,
+	    HostInstanceType:      &hostInstanceType,
 	}
 
 	// Create a Sddc
-	err := sddcClient.Create(orgID, *awsSddcConfig, nil)
+	task, err := sddcClient.Create(orgID,*awsSddcConfig,nil)
 	if err != nil {
 		return fmt.Errorf("Error while creating sddc %s: %v", sddcName, err)
 	}
 
 	// Wait until Sddc is created
-
-	/*d.SetId(*sddcID)
+	sddcID := task.ResourceId
+	d.SetId(*sddcID)
 	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		tasksClient := tasks.NewTasksClientImpl(connectorWrapper.Connector)
+		tasksClient := orgs.NewDefaultTasksClient(connectorWrapper)
 		task, err := tasksClient.Get(orgID, task.Id)
 		if err != nil {
 			if err.Error() == (errors.Unauthenticated{}.Error()) {
@@ -243,7 +244,7 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 			return resource.RetryableError(fmt.Errorf("Expected instance to be created but was in state %s", *task.Status))
 		}
 		return resource.NonRetryableError(resourceSddcRead(d, m))
-	})*/
+	})
 	return nil
 }
 
