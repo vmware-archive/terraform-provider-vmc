@@ -1,13 +1,20 @@
 
+<<<<<<< HEAD
 
 # Contributing to terraform-provider-for-vmc
 
 The terraform-provider-for-vmc project team welcomes contributions from the community. If you wish to contribute code and 
 you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. 
+=======
+# Contributing to terraform-provider-vmware-cloud
+
+The terraform-provider-vmware-cloud project team welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. 
+>>>>>>> ead904331fb85b8b7ca8914e91198a9b723dcc56
 For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq).
 
 ## Contribution Flow
 
+<<<<<<< HEAD
 This is a rough outline of what a contributor's workflow looks like:
 
 - Create a topic branch from where you want to base your work
@@ -73,3 +80,6 @@ and commits.
 ## Reporting Bugs and Creating Issues
 
 When opening a new issue, try to roughly follow the commit message format conventions above.
+=======
+Please follow this link  for instructions for creating a pull request from fork [here](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork).
+>>>>>>> ead904331fb85b8b7ca8914e91198a9b723dcc56

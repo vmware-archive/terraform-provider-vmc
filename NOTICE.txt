@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 terraform-provider-for-vmware-cloud
+=======
+terraform-provider-vmware-cloud
+>>>>>>> ead904331fb85b8b7ca8914e91198a9b723dcc56
 
 Copyright 2019 VMware, Inc. All Rights Reserved.
 
