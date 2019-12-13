@@ -1,16 +1,8 @@
-<<<<<<< HEAD
 terraform-provider-for-vmware-cloud
 
 Copyright 2019 VMware, Inc.  All rights reserved
 
 The Mozilla Public License, Version 2.0 (the License) set forth below applies to all parts of the terraform-provider-for-vmware-cloud project.  You may not use this file except in compliance with the License.
-=======
-terraform-provider-vmware-cloud
-
-Copyright 2019 VMware, Inc.  All rights reserved
-
-The Mozilla Public License, Version 2.0 (the License) set forth below applies to all parts of the terraform-provider-vmware-cloud project.  You may not use this file except in compliance with the License.
->>>>>>> ead904331fb85b8b7ca8914e91198a9b723dcc56
 
 Mozilla Public License, Version 2.0
 
