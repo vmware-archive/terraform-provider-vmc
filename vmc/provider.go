@@ -7,8 +7,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	":wq" +
-		"t"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 )
 
 type ConnectorWrapper struct {
