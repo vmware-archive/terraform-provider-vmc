@@ -45,40 +45,10 @@ provider "vmc" {
 
 The following arguments are used to configure the VMware VMC Provider:
 
-* `org_id` - (Required) Organization identifier.
-* `region` - (Required) The region of the cloud resources to work in.
-* `num_hosts` - (Optional) The number of hosts.
-* `connected_account_id` - (Optional) The linked connected account identifier.
-* `sddc_id` - (Optional) SDDC identifier.
-* `force_refresh` - (Optional) Boolean value when set to true, forces the mappings for datacenters 
-   to be refreshed for the connected account.
-* `instance_type` - (Optional) The server instance type to be used.
-* `sddc_id` - (Required) SDDC identifier.
-* `private_ip` - (Required) Workload VM private IP to be assigned the public IP just allocated.
-* `name` - (Required) Workload VM private IPs to be assigned the public IP just allocated.
-* `region` - (Required)  The region of the cloud resources to work in.
-* `sddc_name` - (Required) Name of the SDDC.
-* `storage_capacity` - (Optional) The storage capacity value to be requested for the sddc 
-   primary cluster, in GiBs. If provided, instead of using the direct-attached storage, a 
-   capacity value amount of seperable storage will be used.
-* `num_host` - (Required) The number of hosts.
-* `account_link_sddc_config` - (Optional) The account linking configuration object.
-* `vpc_cidr` - (Optional) AWS VPC IP range. Only prefix of 16 or 20 is currently supported.
-* `sddc_type` - (Optional) Denotes the sddc type , if the value is null or empty, the type 
-   is considered as default.
-* `vxlan_subnet` - (Optional) VXLAN IP subnet in CIDR for compute gateway.
-* `delay_account_link` - (Optional)  Boolean flag identifying whether account linking 
-   should be delayed or not for the SDDC.
-* `provider_type` - (Optional)  Determines what additional properties are available 
-   based on cloud provider.
-* `skip_creating_vxlan` - (Optional) Boolean value to skip creating vxlan for 
-   compute gateway for SDDC provisioning.
-* `sso_domain` - (Optional) The SSO domain name to use for vSphere users. 
-   If not specified, vmc.local will be used.
-* `sddc_template_id` - (Optional) If provided, configuration from the template will 
-   applied to the provisioned SDDC.
-* `deployment_type` - (Optional) Denotes if request is for a SingleAZ 
-   or a MultiAZ SDDC. Default is SingleAZ.
+* `refresh_token` - (Required) The refresh token is used to authenticate when calling VMware Cloud Services APIs.
+These tokens are scoped within the organization.
+* `csp_url` - (Required) Cloud Service Provider URL.
+* `vmc_url` - (Required) VMC url.
 
 #### Example vmc.tf file
 

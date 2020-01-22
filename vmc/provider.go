@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	":wq" +
+		"t"
 )
 
 type ConnectorWrapper struct {
@@ -20,7 +21,7 @@ type ConnectorWrapper struct {
 func (c *ConnectorWrapper) authenticate() error {
 	var err error
 	httpClient := HTTPClientNoServerVerificaiton()
-	c.Connector , err = NewVmcConnectorByRefreshToken(c.RefreshToken, c.VmcURL, c.CspURL,httpClient)
+	c.Connector, err = NewVmcConnectorByRefreshToken(c.RefreshToken, c.VmcURL, c.CspURL, httpClient)
 	if err != nil {
 		return err
 	}
@@ -67,7 +68,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	vmcURL := d.Get("vmc_url").(string)
 	cspURL := d.Get("csp_url").(string)
 	httpClient := HTTPClientNoServerVerificaiton()
-	connector , err := NewVmcConnectorByRefreshToken(refreshToken,vmcURL,cspURL,httpClient)
+	connector, err := NewVmcConnectorByRefreshToken(refreshToken, vmcURL, cspURL, httpClient)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating connector : %v ", err)
 	}
