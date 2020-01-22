@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 dist: xenial
+=======
+dist: trusty
 sudo: required
 services:
   - docker
