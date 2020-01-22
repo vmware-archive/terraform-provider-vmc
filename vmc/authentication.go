@@ -48,7 +48,7 @@ func NewVmcConnectorByRefreshToken(refreshToken, vmcURL, cspURL string,
 	return connector, nil
 }
 
-// SecurityContextByRefreshToken returns Security Context with access token that is recieved from CSP using Refresh Token by OAuth authenticaiton scheme.
+// SecurityContextByRefreshToken returns Security Context with access token that is received from CSP using Refresh Token by OAuth authentication scheme.
 func SecurityContextByRefreshToken(refreshToken string, cspURL string) (core.SecurityContext, error) {
 	payload := strings.NewReader("refresh_token=" + refreshToken)
 
