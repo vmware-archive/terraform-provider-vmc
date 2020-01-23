@@ -40,6 +40,7 @@ Testing the Provider
 
 Set required environment variables based as per your infrastructure settings
 
+
 ```sh
 $ export REFRESH_TOKEN=xxx
 $ export ORG_ID=xxxx
@@ -49,6 +50,9 @@ $ export TEST_SDDC_ID=xxx
 In order to run the full suite of Acceptance tests, run `make testacc`.
 
 *Note:* Acceptance tests create real resources, and often cost money to run.
+
+$ make testacc
+```
 
 # License
 
