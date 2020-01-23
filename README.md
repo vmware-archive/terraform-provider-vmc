@@ -117,7 +117,7 @@ Verify the sddc is created
 
 ## Add/Remove hosts
 
-Update the "num_host" field in [main.tf](main.tf).
+Update the "num_host" field in [main.tf](https://github.com/vmware/terraform-provider-vmc/blob/master/examples/main.tf).
 Review and execute the plan
 
 ```sh
