@@ -33,7 +33,7 @@ go build -o terraform-provider-vmc
 terraform init
 ```
 
-## Connect to VMC and create a testing sddc
+## Connect to VMC and create a SDDC
 
 Update following fields in the [main.tf](main.tf) with your infrastructure settings
 
@@ -105,14 +105,19 @@ Check if the terraform plan looks good
 ## Execute the plan
 
 ```sh
-terraform apply
+   terraform apply
 ```
 
-Verified the sddc is created
+## Check the terraform state 
+```sh
+terraform state
+```
+
+Verify the sddc is created
 
 ## Add/Remove hosts
 
-Update the "num_host" field in [main.tf](main.tf) to expected number.   
+Update the "num_host" field in [main.tf](main.tf).
 Review and execute the plan
 
 ```sh
@@ -120,7 +125,7 @@ terraform plan
 terraform apply
 ```
 
-Verified the hosts are added/removed successfully.
+Verify the hosts are added/removed successfully.
 
 ## To delete the sddc
 
