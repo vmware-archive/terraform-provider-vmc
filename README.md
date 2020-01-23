@@ -34,7 +34,6 @@ Using the Provider
 
 The instructions and configuration details to run the provider can be found in [examples/README.md](https://github.com/vmware/terraform-provider-vmc/blob/master/examples/README.md)
 
-
 Testing the Provider
 ----------------------
 
