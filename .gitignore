@@ -10,3 +10,4 @@ terraform.tfstate
 *.bak
 *~
 .terraform.tfstate.lock.info
+*.tf
