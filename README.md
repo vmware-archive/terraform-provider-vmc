@@ -110,7 +110,7 @@ Check if the terraform plan looks good
 
 ## Check the terraform state 
 ```sh
-terraform state
+terraform show
 ```
 
 Verify the sddc is created
