@@ -108,6 +108,9 @@ func testCheckVmcSddcDestroy(s *terraform.State) error {
 
 func testAccVmcSddcConfigBasic(sddcName string) string {
 	return fmt.Sprintf(`
+provider "vmc" {
+	refresh_token = %q
+}
 	
 data "vmc_org" "my_org" {
 	id = %q
