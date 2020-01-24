@@ -1,5 +1,5 @@
 variable "api_token"{
-  description = "API token used to auntheicate when calling the VMware Cloud Services API."
+  description = "API token used to authenticate when calling the VMware Cloud Services API."
   default = ""
 }
 
