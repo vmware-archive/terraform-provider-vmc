@@ -1,9 +1,9 @@
 provider "vmc" {
-  refresh_token = ""
+  refresh_token = var.api_token
 }
 
 data "vmc_org" "my_org" {
-  id = ""
+  id = var.org_id
 }
 
 data "vmc_connected_accounts" "my_accounts" {
@@ -16,10 +16,11 @@ data "vmc_customer_subnets" "my_subnets" {
   region               = var.sddc_region
 }
 
+
 resource "vmc_sddc" "sddc_1" {
   org_id = data.vmc_org.my_org.id
 
-  sddc_name           = ""
+  sddc_name           = var.sddc_name
   vpc_cidr            = var.vpc_cidr
   num_host            = 3
   provider_type       = "AWS"
