@@ -149,6 +149,7 @@ resource "vmc_sddc" "sddc_1" {
 	#  ]
 }
 `,
+		os.Getenv("REFRESH_TOKEN"),
 		os.Getenv("ORG_ID"),
 		sddcName,
 	)

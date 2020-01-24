@@ -30,7 +30,7 @@ func testAccDataSourceVmcConnectedAccountsConfig() string {
 provider "vmc" {
 	refresh_token = %q
 }
-	
+
 data "vmc_org" "my_org" {
 	id = %q
 }
@@ -39,6 +39,7 @@ data "vmc_connected_accounts" "my_accounts" {
 	org_id = "${data.vmc_org.my_org.id}"
 }
 `,
+		os.Getenv("REFRESH_TOKEN"),
 		os.Getenv("ORG_ID"),
 	)
 }

@@ -37,6 +37,7 @@ data "vmc_org" "my_org" {
 
 }
 `,
+		os.Getenv("REFRESH_TOKEN"),
 		os.Getenv("ORG_ID"),
 	)
 }
