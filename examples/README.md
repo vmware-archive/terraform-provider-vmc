@@ -1,6 +1,6 @@
 # Provision an SDDC Example
 
-This is an example that supports SDDC management actions like creating an SDDC , 
+This is an example that supports SDDC management actions like creating an SDDC, 
 updating or deleting an existing SDDC.
 
 To run the example:
