@@ -9,5 +9,5 @@ terraform.tfstate
 *.backup
 *.bak
 *~
-*.tf
+/*.tf
 .terraform.tfstate.lock.info
