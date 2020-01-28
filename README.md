@@ -3,6 +3,7 @@
 This is the repository for the Terraform provider for VMware Cloud, which one can use with
 Terraform to work with [VMware Cloud on AWS](https://vmc.vmware.com/).
 
+
 Requirements
 ------------
 
@@ -49,6 +50,7 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 
 *Note:* Acceptance tests create real resources, and often cost money to run.
 
+```sh
 $ make testacc
 ```
 
