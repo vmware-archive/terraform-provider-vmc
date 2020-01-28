@@ -31,62 +31,28 @@ go get
 go build -o terraform-provider-vmc
 ```
 
-## Configure the provider
+Using the Provider
+----------------------
 
-The instructions and examples to configure the provider can be found in [examples/README.md](https://github.com/vmware/terraform-provider-vmc/blob/master/examples/README.md)
+The instructions and configuration details to run the provider can be found in [examples/README.md](https://github.com/vmware/terraform-provider-vmc/blob/master/examples/README.md)
 
-## Load the provider
 
-```sh
-terraform init
-```
+Testing the Provider
+----------------------
 
-## Try a dry run
-
-```sh
-terraform plan
-```
-
-Check if the terraform plan looks good.
-
-## Execute the plan
-
-```sh
-   terraform apply
-```
-
-Verify the SDDC has been created successfully.
-
-## Check the terraform state 
-```sh
-terraform show
-```
-
-## Add/Remove hosts
-
-Update the "num_host" field in [main.tf](https://github.com/vmware/terraform-provider-vmc/blob/master/examples/main.tf).
-Execute the plan
-
-```sh
-terraform apply
-```
-
-Verify the hosts are added/removed successfully.
-
-## To delete the sddc
-
-```sh
-terraform destroy
-```
-
-# Testing the Provider
-
-## Set required environment variable
+Set required environment variables based as per your infrastructure settings
 
 ```sh
 $ export REFRESH_TOKEN=xxx
 $ export ORG_ID=xxxx
 $ export TEST_SDDC_ID=xxx
+```
+
+In order to run the full suite of Acceptance tests, run `make testacc`.
+
+*Note:* Acceptance tests create real resources, and often cost money to run.
+
+```sh
 $ make testacc
 ```
 
