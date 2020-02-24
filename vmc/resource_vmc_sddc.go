@@ -33,11 +33,6 @@ func resourceSddc() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"org_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "ID of this resource",
-			},
 			"storage_capacity": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -166,8 +161,7 @@ func resourceSddc() *schema.Resource {
 func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 	connectorWrapper := m.(*ConnectorWrapper)
 	sddcClient := orgs.NewDefaultSddcsClient(connectorWrapper)
-
-	orgID := d.Get("org_id").(string)
+	orgID := connectorWrapper.OrgID
 	storageCapacity := d.Get("storage_capacity").(int)
 	storageCapacityConverted := int64(storageCapacity)
 	sddcName := d.Get("sddc_name").(string)

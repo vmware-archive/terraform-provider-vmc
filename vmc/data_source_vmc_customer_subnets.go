@@ -15,11 +15,6 @@ func dataSourceVmcCustomerSubnets() *schema.Resource {
 		Read: dataSourceVmcCustomerSubnetsRead,
 
 		Schema: map[string]*schema.Schema{
-			"org_id": {
-				Type:        schema.TypeString,
-				Description: "Organization identifier.",
-				Required:    true,
-			},
 			"connected_account_id": {
 				Type:        schema.TypeString,
 				Description: "The linked connected account identifier.",
@@ -77,7 +72,7 @@ func dataSourceVmcCustomerSubnets() *schema.Resource {
 
 func dataSourceVmcCustomerSubnetsRead(d *schema.ResourceData, m interface{}) error {
 
-	orgID := d.Get("org_id").(string)
+	orgID := m.(*ConnectorWrapper).OrgID
 	accountID := d.Get("connected_account_id").(string)
 	sddcID := d.Get("sddc_id").(string)
 	region := d.Get("region").(string)
@@ -103,10 +98,6 @@ func dataSourceVmcCustomerSubnetsRead(d *schema.ResourceData, m interface{}) err
 			ids = append(ids, *subnet.SubnetId)
 		}
 	}
-
-	// for _, subnet := range subnets.VpcMap["VpcInfoSubnets"].Subnets {
-	// 	ids = append(ids, subnet.SubnetId)
-	// }
 	log.Printf("[DEBUG] Subnet IDs are %v\n", ids)
 
 	if err != nil {

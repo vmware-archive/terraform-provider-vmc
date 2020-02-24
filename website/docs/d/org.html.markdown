@@ -19,4 +19,4 @@ data "vmc_org" "my_org" {
 
 ## Argument Reference
 
-* `id` - (Required) ID of the organization.
+* `id` - (Computed) ID of the organization.
