@@ -13,7 +13,6 @@ The connected accounts data source get a list of connected accounts.
 
 ```hcl
 data "vmc_connected_accounts" "my_accounts" {
-  org_id = var.org_id
   account_number = var.aws_account_number
 }
 ```

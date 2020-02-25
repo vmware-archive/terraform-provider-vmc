@@ -250,7 +250,7 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
 	sddcID := d.Id()
-	orgID := d.Get("org_id").(string)
+	orgID := (m.(*ConnectorWrapper)).OrgID
 	sddc, err := getSDDC(connector, orgID, sddcID)
 	if err != nil {
 		if err.Error() == errors.NewNotFound().Error() {
@@ -298,7 +298,7 @@ func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
 	sddcClient := orgs.NewDefaultSddcsClient(connector)
 	sddcID := d.Id()
-	orgID := d.Get("org_id").(string)
+	orgID := (m.(*ConnectorWrapper)).OrgID
 
 	task, err := sddcClient.Delete(orgID, sddcID, nil, nil, nil)
 	if err != nil {
@@ -326,7 +326,7 @@ func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
 	esxsClient := sddcs.NewDefaultEsxsClient(connector)
 	sddcID := d.Id()
-	orgID := d.Get("org_id").(string)
+	orgID := (m.(*ConnectorWrapper)).OrgID
 
 	// Add,remove hosts
 	if d.HasChange("num_host") {
