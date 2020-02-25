@@ -38,7 +38,6 @@ func dataSourceVmcOrgRead(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
 	orgClient := vmc.NewDefaultOrgsClient(connector)
 	org, err := orgClient.Get(orgID)
-
 	if err != nil {
 		return fmt.Errorf("Error while reading org information for %s: %v", orgID, err)
 	}

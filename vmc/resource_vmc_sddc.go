@@ -169,14 +169,12 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 	numHost := d.Get("num_host").(int)
 	sddcType := d.Get("sddc_type").(string)
 
-	if orgID == "" {
-		return fmt.Errorf("org ID is a required parameter and cannot be empty")
-	}
 	if sddcName == "" {
 		return fmt.Errorf("SDDC Name is a required parameter and cannot be empty")
 	}
-	if numHost == 0 {
-		return fmt.Errorf("number of hosts is a required parameter and cannot be 0")
+
+	if numHost == 0  {
+		return fmt.Errorf("number of hosts cannot be 0")
 	}
 
 	var sddcTypePtr *string

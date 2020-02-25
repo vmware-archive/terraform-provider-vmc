@@ -81,10 +81,6 @@ func dataSourceVmcCustomerSubnetsRead(d *schema.ResourceData, m interface{}) err
 	forceRefresh := d.Get("force_refresh").(bool)
 	instanceType := d.Get("instance_type").(string)
 
-	if orgID == "" {
-		return fmt.Errorf("org ID is a required parameter and cannot be empty")
-	}
-
 	if region == "" {
 		return fmt.Errorf("region is a required parameter and cannot be empty")
 	}

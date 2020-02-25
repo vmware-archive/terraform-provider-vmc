@@ -35,3 +35,4 @@ resource "vmc_sddc" "sddc_1" {
     delete = "180m"
   }
 }
+
