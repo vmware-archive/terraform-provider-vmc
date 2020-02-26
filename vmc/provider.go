@@ -17,8 +17,6 @@ type ConnectorWrapper struct {
 	OrgID          string
 	VmcURL         string
 	CspURL         string
-	OrgName        string
-	OrgDisplayName string
 }
 
 func (c *ConnectorWrapper) authenticate() error {
@@ -81,13 +79,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Error creating connector : %v ", err)
 	}
-	connectorWrapper := &ConnectorWrapper{
-		Connector:    connector,
-		RefreshToken: refreshToken,
-		OrgID:        orgID,
-		VmcURL:       vmcURL,
-		CspURL:       cspURL,
-	}
 
-	return connectorWrapper, nil
+	return &ConnectorWrapper{connector, refreshToken, orgID, vmcURL,cspURL}, nil
 }
