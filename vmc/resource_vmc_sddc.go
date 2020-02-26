@@ -173,7 +173,7 @@ func resourceSddcCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("SDDC Name is a required parameter and cannot be empty")
 	}
 
-	if numHost == 0  {
+	if numHost == 0 {
 		return fmt.Errorf("number of hosts cannot be 0")
 	}
 

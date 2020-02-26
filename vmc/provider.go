@@ -13,10 +13,10 @@ import (
 
 type ConnectorWrapper struct {
 	client.Connector
-	RefreshToken   string
-	OrgID          string
-	VmcURL         string
-	CspURL         string
+	RefreshToken string
+	OrgID        string
+	VmcURL       string
+	CspURL       string
 }
 
 func (c *ConnectorWrapper) authenticate() error {
@@ -80,5 +80,5 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, fmt.Errorf("Error creating connector : %v ", err)
 	}
 
-	return &ConnectorWrapper{connector, refreshToken, orgID, vmcURL,cspURL}, nil
+	return &ConnectorWrapper{connector, refreshToken, orgID, vmcURL, cspURL}, nil
 }
