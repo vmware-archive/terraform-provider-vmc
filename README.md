@@ -41,9 +41,11 @@ Testing the Provider
 Set required environment variables based as per your infrastructure settings
 
 ```sh
-$ export REFRESH_TOKEN=xxx
+$ export API_TOKEN=xxx
 $ export ORG_ID=xxxx
+$ export ORG_DISPLAY_NAME=xxx
 $ export TEST_SDDC_ID=xxx
+$ export AWS_ACCOUNT_NUMBER=xxx
 ```
 
 In order to run the full suite of Acceptance tests, run `make testacc`.

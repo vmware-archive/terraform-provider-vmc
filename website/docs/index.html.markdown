@@ -52,7 +52,7 @@ create in VMC.
 # Provider. 
 
 provider "vmc" {
-  refresh_token = var.api_token
+  api_token = var.api_token
   org_id = var.org_id
 }
 

@@ -18,11 +18,11 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 )
 
-// NewVmcConnectorByRefreshToken returns client connector by using OAuth authentication using Refresh Token.
-func NewVmcConnectorByRefreshToken(refreshToken, vmcURL, cspURL string,
+// NewVmcConnectorByAPIToken returns client connector by using OAuth authentication using API Token.
+func NewVmcConnectorByAPIToken(APIToken, vmcURL, cspURL string,
 	httpClient http.Client) (client.Connector, error) {
-	if len(refreshToken) <= 0 {
-		return nil, fmt.Errorf("refresh token cannot be empty")
+	if len(APIToken) <= 0 {
+		return nil, fmt.Errorf("API token cannot be empty")
 	}
 
 	if len(vmcURL) <= 0 {
@@ -37,7 +37,7 @@ func NewVmcConnectorByRefreshToken(refreshToken, vmcURL, cspURL string,
 			CSPRefreshUrlSuffix
 	}
 
-	securityCtx, err := SecurityContextByRefreshToken(refreshToken, cspURL)
+	securityCtx, err := SecurityContextByAPIToken(APIToken, cspURL)
 	if err != nil {
 		return nil, err
 	}
@@ -48,9 +48,9 @@ func NewVmcConnectorByRefreshToken(refreshToken, vmcURL, cspURL string,
 	return connector, nil
 }
 
-// SecurityContextByRefreshToken returns Security Context with access token that is received from CSP using Refresh Token by OAuth authentication scheme.
-func SecurityContextByRefreshToken(refreshToken string, cspURL string) (core.SecurityContext, error) {
-	payload := strings.NewReader("refresh_token=" + refreshToken)
+// SecurityContextByAPIToken returns Security Context with access token that is received from CSP using API Token by OAuth authentication scheme.
+func SecurityContextByAPIToken(APIToken string, cspURL string) (core.SecurityContext, error) {
+	payload := strings.NewReader("refresh_token=" + APIToken)
 
 	req, _ := http.NewRequest("POST", cspURL, payload)
 
