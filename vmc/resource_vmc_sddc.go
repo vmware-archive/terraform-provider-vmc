@@ -250,7 +250,7 @@ func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
 	sddcID := d.Id()
 	orgID := (m.(*ConnectorWrapper)).OrgID
-	sddc, err := GetSDDC(connector, orgID, sddcID)
+	sddc, err := getSDDC(connector, orgID, sddcID)
 	if err != nil {
 		if err.Error() == errors.NewNotFound().Error() {
 			log.Printf("SDDC with ID %s not found", sddcID)
@@ -298,7 +298,7 @@ func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
 	sddcID := d.Id()
 	orgID := (m.(*ConnectorWrapper)).OrgID
 
-	err := DeleteSDDC(d, connector, orgID, sddcID)
+	err := deleteSDDC(d, connector, orgID, sddcID)
 	if err != nil {
 		return fmt.Errorf("Error while deleting sddc with id %q  : %v", sddcID, err)
 	}
@@ -308,6 +308,7 @@ func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
 func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
 	esxsClient := sddcs.NewDefaultEsxsClient(connector)
+	sddcClient := orgs.NewDefaultSddcsClient(connector)
 	sddcID := d.Id()
 	orgID := (m.(*ConnectorWrapper)).OrgID
 
@@ -363,7 +364,7 @@ func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if d.HasChange("host_instance_type") {
-		err := DeleteSDDC(d, connector, orgID, sddcID)
+		err := deleteSDDC(d, connector, orgID, sddcID)
 
 		if err != nil {
 			return fmt.Errorf("Error while deleting sddc with id %q  : %v", sddcID, err)
@@ -413,18 +414,19 @@ func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
 			HostInstanceType:      &hostInstanceType,
 		}
 
-		// Create a Sddc
 		task, err := sddcClient.Create(orgID, *awsSddcConfig, nil)
 		if err != nil {
-			return fmt.Errorf("Error while creating sddc %s: %v", sddcName, err)
+			return fmt.Errorf("Error while creating sddc %s", err)
 		}
-
-		// Wait until Sddc is created
-		sddcID := task.ResourceId
-		d.SetId(*sddcID)
 		return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+			// Create a Sddc
+
+
+			// Wait until Sddc is created
+			sddcID := task.ResourceId
+			d.SetId(*sddcID)
 			tasksClient := orgs.NewDefaultTasksClient(connector)
-			task, err := tasksClient.Get(orgID, task.Id)
+			task, err = tasksClient.Get(orgID, task.Id)
 			if err != nil {
 				if err.Error() == (errors.Unauthenticated{}.Error()) {
 					log.Print("Auth error", err.Error(), errors.Unauthenticated{}.Error())
@@ -470,4 +472,34 @@ func expandAccountLinkSddcConfig(l []interface{}) []model.AccountLinkSddcConfig 
 		configs = append(configs, con)
 	}
 	return configs
+}
+
+func getSDDC(connector client.Connector, orgID string, sddcID string) (model.Sddc, error) {
+	sddcClient := orgs.NewDefaultSddcsClient(connector)
+	sddc, err := sddcClient.Get(orgID, sddcID)
+	return sddc, err
+}
+
+func deleteSDDC(d *schema.ResourceData, connector client.Connector, orgID string, sddcID string) error {
+	sddcClient := orgs.NewDefaultSddcsClient(connector)
+	task, err := sddcClient.Delete(orgID, sddcID, nil, nil, nil)
+	if err != nil {
+		if err.Error() == errors.NewInvalidRequest().Error() {
+			log.Printf("Can't Delete : SDDC with ID %s not found or already deleted %v", sddcID, err)
+			return nil
+		}
+		return fmt.Errorf("Error while deleting sddc %s: %v", sddcID, err)
+	}
+	tasksClient := orgs.NewDefaultTasksClient(connector)
+	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+		task, err := tasksClient.Get(orgID, task.Id)
+		if err != nil {
+			return resource.NonRetryableError(fmt.Errorf("Error while deleting sddc %s: %v", sddcID, err))
+		}
+		if *task.Status != "FINISHED" {
+			return resource.RetryableError(fmt.Errorf("Expected instance to be deleted but was in state %s", *task.Status))
+		}
+		d.SetId("")
+		return resource.NonRetryableError(nil)
+	})
 }
