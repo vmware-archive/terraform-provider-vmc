@@ -250,7 +250,7 @@ func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
 	sddcID := d.Id()
 	orgID := (m.(*ConnectorWrapper)).OrgID
-	sddc, err := getSDDC(connector, orgID, sddcID)
+	sddc, err := GetSDDC(connector, orgID, sddcID)
 	if err != nil {
 		if err.Error() == errors.NewNotFound().Error() {
 			log.Printf("SDDC with ID %s not found", sddcID)
@@ -295,30 +295,14 @@ func resourceSddcRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceSddcDelete(d *schema.ResourceData, m interface{}) error {
 	connector := (m.(*ConnectorWrapper)).Connector
-	sddcClient := orgs.NewDefaultSddcsClient(connector)
 	sddcID := d.Id()
 	orgID := (m.(*ConnectorWrapper)).OrgID
 
-	task, err := sddcClient.Delete(orgID, sddcID, nil, nil, nil)
+	err := DeleteSDDC(d, connector, orgID, sddcID)
 	if err != nil {
-		if err.Error() == errors.NewInvalidRequest().Error() {
-			log.Printf("Can't Delete : SDDC with ID %s not found or already deleted %v", sddcID, err)
-			return nil
-		}
-		return fmt.Errorf("Error while deleting sddc %s: %v", sddcID, err)
+		return fmt.Errorf("Error while deleting sddc with id %q  : %v", sddcID, err)
 	}
-	tasksClient := orgs.NewDefaultTasksClient(connector)
-	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		task, err := tasksClient.Get(orgID, task.Id)
-		if err != nil {
-			return resource.NonRetryableError(fmt.Errorf("Error while deleting sddc %s: %v", sddcID, err))
-		}
-		if *task.Status != "FINISHED" {
-			return resource.RetryableError(fmt.Errorf("Expected instance to be deleted but was in state %s", *task.Status))
-		}
-		d.SetId("")
-		return resource.NonRetryableError(nil)
-	})
+	return nil
 }
 
 func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
@@ -367,17 +351,98 @@ func resourceSddcUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	// Update sddc name
 	if d.HasChange("sddc_name") {
-		sddcClient := orgs.NewDefaultSddcsClient(connector)
 		newSDDCName := d.Get("sddc_name").(string)
 		sddcPatchRequest := model.SddcPatchRequest{
 			Name: &newSDDCName,
 		}
 		sddc, err := sddcClient.Patch(orgID, sddcID, sddcPatchRequest)
-
 		if err != nil {
 			return fmt.Errorf("Error while updating sddc's name %v", err)
 		}
 		d.Set("sddc_name", sddc.Name)
+	}
+
+	if d.HasChange("host_instance_type") {
+		err := DeleteSDDC(d, connector, orgID, sddcID)
+
+		if err != nil {
+			return fmt.Errorf("Error while deleting sddc with id %q  : %v", sddcID, err)
+		}
+
+		sddcClient := orgs.NewDefaultSddcsClient(connector)
+		storageCapacity := d.Get("storage_capacity").(int)
+		storageCapacityConverted := int64(storageCapacity)
+		sddcName := d.Get("sddc_name").(string)
+		vpcCidr := d.Get("vpc_cidr").(string)
+		numHost := d.Get("num_host").(int)
+		sddcType := d.Get("sddc_type").(string)
+
+		var sddcTypePtr *string
+		if sddcType != "" {
+			sddcTypePtr = &sddcType
+		}
+		vxlanSubnet := d.Get("vxlan_subnet").(string)
+		delayAccountLink := d.Get("delay_account_link").(bool)
+		accountLinkConfig := &model.AccountLinkConfig{
+			DelayAccountLink: &delayAccountLink,
+		}
+		providerType := d.Get("provider_type").(string)
+		skipCreatingVxlan := d.Get("skip_creating_vxlan").(bool)
+		ssoDomain := d.Get("sso_domain").(string)
+		sddcTemplateID := d.Get("sddc_template_id").(string)
+		deploymentType := d.Get("deployment_type").(string)
+		region := d.Get("region").(string)
+		accountLinkSddcConfig := expandAccountLinkSddcConfig(d.Get("account_link_sddc_config").([]interface{}))
+		hostInstanceType := model.HostInstanceTypes(d.Get("host_instance_type").(string))
+
+		var awsSddcConfig = &model.AwsSddcConfig{
+			StorageCapacity:       &storageCapacityConverted,
+			Name:                  sddcName,
+			VpcCidr:               &vpcCidr,
+			NumHosts:              int64(numHost),
+			SddcType:              sddcTypePtr,
+			VxlanSubnet:           &vxlanSubnet,
+			AccountLinkConfig:     accountLinkConfig,
+			Provider:              providerType,
+			SkipCreatingVxlan:     &skipCreatingVxlan,
+			AccountLinkSddcConfig: accountLinkSddcConfig,
+			SsoDomain:             &ssoDomain,
+			SddcTemplateId:        &sddcTemplateID,
+			DeploymentType:        &deploymentType,
+			Region:                region,
+			HostInstanceType:      &hostInstanceType,
+		}
+
+		// Create a Sddc
+		task, err := sddcClient.Create(orgID, *awsSddcConfig, nil)
+		if err != nil {
+			return fmt.Errorf("Error while creating sddc %s: %v", sddcName, err)
+		}
+
+		// Wait until Sddc is created
+		sddcID := task.ResourceId
+		d.SetId(*sddcID)
+		return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+			tasksClient := orgs.NewDefaultTasksClient(connector)
+			task, err := tasksClient.Get(orgID, task.Id)
+			if err != nil {
+				if err.Error() == (errors.Unauthenticated{}.Error()) {
+					log.Print("Auth error", err.Error(), errors.Unauthenticated{}.Error())
+					err = (m.(*ConnectorWrapper)).authenticate()
+					if err != nil {
+						return resource.NonRetryableError(fmt.Errorf("Error authenticating in CSP: %s", err))
+					}
+					return resource.RetryableError(fmt.Errorf("Instance creation still in progress"))
+				}
+				return resource.NonRetryableError(fmt.Errorf("Error describing instance: %s", err))
+
+			}
+			if *task.Status != "FINISHED" {
+				return resource.RetryableError(fmt.Errorf("Expected instance to be created but was in state %s", *task.Status))
+			}
+			return resource.NonRetryableError(resourceSddcRead(d, m))
+		})
+
 	}
 	return resourceSddcRead(d, m)
 }
@@ -405,10 +470,4 @@ func expandAccountLinkSddcConfig(l []interface{}) []model.AccountLinkSddcConfig 
 		configs = append(configs, con)
 	}
 	return configs
-}
-
-func getSDDC(connector client.Connector, orgID string, sddcID string) (model.Sddc, error) {
-	sddcClient := orgs.NewDefaultSddcsClient(connector)
-	sddc, err := sddcClient.Get(orgID, sddcID)
-	return sddc, err
 }
