@@ -151,3 +151,19 @@ func resourcePublicIpDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+func getNSXTReverseProxyConnector() (client.Connector, error) {
+	apiToken := os.Getenv(APIToken)
+	nsxtReverseProxyURL := os.Getenv(NSXTReverseProxyUrl)
+	if len(nsxtReverseProxyURL) == 0 {
+		return nil, fmt.Errorf("NSXT reverse proxy url is required for Public IP resource creation.")
+	}
+	if strings.Contains(nsxtReverseProxyURL, SksNSXTManager) {
+		nsxtReverseProxyURL = strings.Replace(nsxtReverseProxyURL, SksNSXTManager, "", -1)
+	}
+	httpClient := http.Client{}
+	connector, err := NewClientConnectorByRefreshToken(apiToken, nsxtReverseProxyURL, DefaultCSPUrl, httpClient)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating connector : %v ", err)
+	}
+	return connector, nil
+}
