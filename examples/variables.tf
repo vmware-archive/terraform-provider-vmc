@@ -37,3 +37,8 @@ variable "public_ip_displayname" {
   description = "Display name for public IP."
   default     = "public-ip-test"
 }
+
+variable "srm_extension_key_suffix" {
+  description = "Custom extension key suffix for SRM. If not specified, default extension key will be used. The custom extension suffix must contain 13 characters or less, be composed of letters, numbers, ., -, and _ characters. The extension suffix must begin and end with a letter or number. The suffix is appended to com.vmware.vcDr- to form the full extension key",
+  default     = ""
+}
