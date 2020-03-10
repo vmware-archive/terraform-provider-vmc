@@ -1,3 +1,9 @@
+This project has moved to the terraform-providers organization and is archived.
+
+The new location is here:
+https://github.com/terraform-providers/terraform-provider-vmc
+
+
 # Terraform provider for VMware Cloud on AWS
 
 This is the repository for the Terraform provider for VMware Cloud, which one can use with
